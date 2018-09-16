@@ -1,0 +1,10 @@
+Pipfile
+*.lock
+*.pyc
+*.sqlite3
+.idea/
+FootlooseStudents/secret.py
+*.log
+*.json
+templates/static/admin/
+templates/static/channels/
