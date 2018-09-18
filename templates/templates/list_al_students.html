@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{%  load staticfiles %}
+
+{% block body %}
+<h3>All students</h3>
+<a href="{% url 'students:listallcsv' %}"><button class="button success large rounded">CSV</button></a>
+<div style="overflow-x: scroll;">
+<table class="table striped table-border" data-role="table" data-rows="100">
+<thead>
+<tr>
+    {% for prop in props %}
+        <th class="sortable-column" >{{ prop }}</th>
+    {% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for student in students %}
+<tr>
+    {% for data in student %}
+        <td>{{ data }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{#<script src="{% static "js/datatables.min.js" %}"></script>#}
+{#<script src="{% static "js/jquery.dataTables.yadcf.min.js" %}"></script>#}
+{#<script src="{% static "js/dt_wrapper.js" %}"></script>#}
+{#<script>#}
+{#var dt = $('.datatable').dt_wrapper([#}
+{#    {column_number: 3, filter_type: "select"},#}
+{#]);#}
+{#</script>#}
+{% endblock %}

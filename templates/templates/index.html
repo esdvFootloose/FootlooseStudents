@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h2>Welcome to the Footloose student portal</h2>
+{% if user.is_authenticated %}
+
+{% else %}
+Please begin by loggin in.
+{% endif %}
+{% endblock %}
