@@ -19,7 +19,7 @@
             {% if user.is_staff %}
             <li><a href="{% url 'students:listall' %}">All members</a></li>
             {% else  %}
-            <li><a href="">Verify</a></li>
+            <li><a href="{% url 'students:verify_request' %}">Verify</a></li>
             {% endif %}
             {%  if user.is_authenticated %}
             <li><a href="{%  url 'login:logout' %}"><span class="mif-vpn-lock icon"></span>Logout</a></li>

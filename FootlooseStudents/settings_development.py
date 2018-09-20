@@ -151,7 +151,7 @@ USE_TZ = True
 EMAIL_HOST = 'localhost'
 
 # Port for sending e-mail.
-EMAIL_PORT = 25
+EMAIL_PORT = 1025
 
 # Optional SMTP authentication information for EMAIL_HOST.
 EMAIL_HOST_USER = ''

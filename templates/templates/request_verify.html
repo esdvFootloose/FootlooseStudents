@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h3>Trigger Verification</h3>
+You are registered as a student of {{ institute }} with instite email of {{ email }}.<br/>
+If this information is not correct please edit your information on your profile on the footloose website first.<br/>
+After clicking the button below the system will send you a link to your institute email. Simply follow that link while logged in to complete the verification. You only have to do this once every academic year.
+<form method="post">
+{%  csrf_token %}
+<input type="submit" class="button success" value="Send Verify Link">
+</form>
+{% endblock %}

@@ -11,7 +11,7 @@ class WordpressAuthBackend:
         if username is None or password is None:
             return None
         if settings.DEBUG:
-            wp_user =  check_output(['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-ext-auth.php', username, password.replace('&', '\&')])
+            wp_user =  check_output(['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-ext-auth.php', username, password.replace('&', '\&').replace('$', '\$')])
         else:
             wp_user = check_output(['php', '/usr/share/nginx/html/api-ext-auth.php', username, password])
         try:
