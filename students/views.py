@@ -1,83 +1,19 @@
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
-from subprocess import check_output
-import json
 import csv
 from django.http import HttpResponse
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from .util import VerifyTokenGenerator
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from .models import Confirmation
 from general_mail import send_mail
+from .wordpress import WordPress
 
-def get_students_data(username=None, as_dict=False):
-    if settings.DEBUG:
-        props = check_output(['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-user.php', 'props'])
-    else:
-        props = check_output(['php', '/usr/share/nginx/html/api-get-user.php', 'props'])
-    props = json.loads(props.decode())
-    #remove/move the list a bit
-    props.remove('roles')
-
-
-    if settings.DEBUG:
-        cmd = ['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-user.php']
-    else:
-        cmd = ['php', '/usr/share/nginx/html/api-get-user.php']
-
-    if username is not None:
-        cmd += [username]
-
-    students = check_output(cmd)
-
-    students = json.loads(students.decode())
-
-    if as_dict:
-        return props, students
-
-    data = []
-    for student in students:
-        if 'lid' not in ''.join(student['roles']):
-            continue
-        student_data = []
-        for prop in props:
-            student_data.append(student[prop])
-        data.append(student_data)
-
-    return props, data
-
-def get_subscriptions(formid, as_dict=False):
-    if settings.DEBUG:
-        cmd = ['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
-    else:
-        cmd = ['php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
-
-    submissions = json.loads(check_output(cmd).decode())
-    props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
-    for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
-        if p == 'policy' or p == 'partner':
-            continue
-        props.append(p)
-    props.append('partner')
-    if as_dict:
-        return props, submissions
-
-    data = []
-    for sub in submissions:
-        sub_data = []
-        for prop in props:
-            try:
-                sub_data.append(sub[prop])
-            except KeyError:
-                sub_data.append('-')
-        data.append(sub_data)
-
-    return props, data
 
 @staff_member_required
 def list_all_submissions_csv(request):
-    props, submissions = get_subscriptions(3)
+    props, submissions = WordPress.get_subscriptions(3)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
@@ -92,7 +28,7 @@ def list_all_submissions_csv(request):
 
 @staff_member_required
 def list_all_submissions(request):
-    props, submissions = get_subscriptions(3)
+    props, submissions = WordPress.get_subscriptions(3)
 
     return render(request, 'list_al_submissions.html', {
         'props' : props,
@@ -102,7 +38,7 @@ def list_all_submissions(request):
 
 @staff_member_required
 def list_all_students_csv(request):
-    props, students = get_students_data()
+    props, students = WordPress.get_students_data()
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="students.csv"'
@@ -116,7 +52,7 @@ def list_all_students_csv(request):
 
 @staff_member_required
 def list_all_students(request):
-    props, data = get_students_data()
+    props, data = WordPress.get_students_data()
 
     return render(request, 'list_al_students.html', {
         'props' : props,
@@ -143,7 +79,7 @@ def verify_student_request(request):
             'message' : 'Only for students'
         })
     begin, end = get_academic_year()
-    props, data = get_students_data(request.user.username, as_dict=True)
+    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
     data = data[0]
     if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
         return render(request, 'base.html', {
@@ -165,7 +101,7 @@ def verify_student_request(request):
         })
 
 
-    generator = PasswordResetTokenGenerator()
+    generator = VerifyTokenGenerator()
     token = generator.make_token(request.user)
     if settings.DEBUG:
         url = 'http://localhost:8080/students/verify/confirm/{}/'.format(token)
@@ -181,14 +117,14 @@ def verify_student_request(request):
 @login_required
 def verify_student_confirm(request, token):
     begin, end = get_academic_year()
-    props, data = get_students_data(request.user.username, as_dict=True)
+    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
     data = data[0]
     if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
         return render(request, 'base.html', {
             'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
         })
 
-    generator = PasswordResetTokenGenerator()
+    generator = VerifyTokenGenerator()
 
     if not generator.check_token(request.user, token):
         return render(request, 'base.html', {
