@@ -29,6 +29,9 @@ ALLOWED_HOSTS = ['*','localhost:8080']
 
 AUTHENTICATION_BACKENDS = ['login.auth.WordpressAuthBackend']
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+SAFE_URL = ['localhost:8080']
 
 # Application definition
 

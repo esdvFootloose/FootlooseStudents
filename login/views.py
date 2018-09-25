@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from .forms import *
+from django.utils.http import is_safe_url
+from django.conf import settings
 
 def login(request):
     if request.user.is_authenticated:
@@ -14,6 +16,9 @@ def login(request):
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
+                    if 'next' in request.GET:
+                        if is_safe_url(request.GET['next'], settings.SAFE_URL):
+                            return HttpResponseRedirect(request.GET['next'])
                     return HttpResponseRedirect('/')
                 else:
                     return render(request, "base.html", {"message" : "Login failed, your account is deactivated. Please contact the IT committee"})

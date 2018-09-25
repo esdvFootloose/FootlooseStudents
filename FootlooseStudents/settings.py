@@ -27,10 +27,12 @@ SECRET_KEY = SECRET_KEY_IMPORT
 DEBUG = False
 
 ALLOWED_HOSTS = ("*",)
-LOGIN_URL = "/login/"
 
 AUTHENTICATION_BACKENDS = ['login.auth.WordpressAuthBackend']
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+SAFE_URL = ['members.esdvfootloose.nl']
 
 # Application definition
 
