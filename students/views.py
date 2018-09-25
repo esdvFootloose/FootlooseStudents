@@ -47,6 +47,55 @@ def get_students_data(username=None, as_dict=False):
 
     return props, data
 
+def get_subscriptions(formid, as_dict=False):
+    if settings.DEBUG:
+        cmd = ['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
+    else:
+        cmd = ['php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
+
+    submissions = json.loads(check_output(cmd).decode())
+    props = list(submissions[0].keys())
+
+    if as_dict:
+        return props, submissions
+
+    data = []
+    for sub in submissions:
+        sub_data = []
+        for prop in props:
+            try:
+                sub_data.append(sub[prop])
+            except KeyError:
+                sub_data.append('-')
+        data.append(sub_data)
+
+    return props, data
+
+@staff_member_required
+def list_all_submissions_csv(request):
+    props, submissions = get_subscriptions(3)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(props)
+    for submission in submissions:
+        writer.writerow(submission)
+
+    return response
+
+
+@staff_member_required
+def list_all_submissions(request):
+    props, submissions = get_subscriptions(3)
+
+    return render(request, 'list_al_submissions.html', {
+        'props' : props,
+        'submissions' : submissions,
+    })
+
+
 @staff_member_required
 def list_all_students_csv(request):
     props, students = get_students_data()

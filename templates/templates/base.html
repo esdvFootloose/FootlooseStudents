@@ -19,6 +19,7 @@
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
                     <li><a href="{% url 'students:listall' %}">All members</a></li>
+                    <li><a href="{% url 'students:listallsubmissions' %}">All submissions</a> </li>
                 {% else  %}
                     <li><a href="{% url 'students:verify_request' %}">Verify</a></li>
                 {% endif %}
