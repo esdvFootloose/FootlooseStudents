@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from .forms import *
 from django.utils.http import is_safe_url
 from django.conf import settings
+from FootlooseStudents.secret import STUDENT_LOGIN_DISABLED
 
 def login(request):
     if request.user.is_authenticated:
@@ -29,7 +30,8 @@ def login(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {
-        'form': form
+        'form': form,
+        'student_login_disabled' : STUDENT_LOGIN_DISABLED
     })
 
 def logout(request):

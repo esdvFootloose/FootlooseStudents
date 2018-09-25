@@ -3,6 +3,7 @@ from subprocess import check_output
 import json
 import logging
 from django.conf import settings
+from FootlooseStudents.secret import STUDENT_LOGIN_DISABLED
 
 logger = logging.getLogger('django')
 
@@ -18,6 +19,10 @@ class WordpressAuthBackend:
             wp_user = json.loads(wp_user.decode())
         except:
             return None
+
+        if STUDENT_LOGIN_DISABLED:
+            if 'administrator' not in wp_user['roles'] and 'bestuur' not in wp_user['roles']:
+                return None
         try:
             django_user = User.objects.get(username=wp_user['username'])
         except User.DoesNotExist:

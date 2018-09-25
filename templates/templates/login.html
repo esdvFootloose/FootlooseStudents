@@ -3,6 +3,10 @@
 {% block body %}
 <center>
 <h3 style="margin-top:2%;">Login</h3>
+    You can use your credentials from the main website.
+    {% if student_login_disabled %}
+    Student login has been temporary disabled, please try again later.
+    {% endif %}
 <form action="{{ request.get_full_path }}" method="post">
 {%  csrf_token %}
     <table class="table" style="width:80%;">
