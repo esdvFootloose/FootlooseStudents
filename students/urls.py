@@ -9,4 +9,5 @@ urlpatterns = [
     path('list/submissions/csv/', views.list_all_submissions_csv, name='listallsubmissionscsv'),
     path('verify/request/', views.verify_student_request, name='verify_request'),
     path('verify/confirm/<slug:token>/', views.verify_student_confirm, name='verify_confirm'),
+    path('list/verifications/', views.list_all_verifications, name='listverifications'),
 ]

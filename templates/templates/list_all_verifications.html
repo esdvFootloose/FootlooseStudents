@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h3>All Verifications</h3>
+<table class="table striped table-border" data-role="table" data-rows="100">
+<thead>
+<tr>
+    <th>user</th>
+    <th>email</th>
+    <th>date</th>
+</tr>
+</thead>
+<tbody>
+{% for confirmation in confirmations %}
+<tr>
+    <td>{{ confirmation.user }}</td>
+    <td>{{ confirmation.email }}</td>
+    <td>{{ confirmation.date }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

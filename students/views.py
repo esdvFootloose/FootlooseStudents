@@ -59,6 +59,12 @@ def list_all_students(request):
         'students' : data,
     })
 
+@staff_member_required
+def list_all_verifications(request):
+    return render(request, 'list_all_verifications.html', {
+        'confirmations' : Confirmation.objects.all()
+    })
+
 def get_academic_year():
     today = date.today()
 
@@ -131,7 +137,6 @@ def verify_student_confirm(request, token):
             'message' : 'Invalid token!'
         })
 
-    #TODO: save the email with which the token was requested to make security tight
     c = Confirmation(date=date.today(), user=request.user, email=data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'])
     c.save()
 
