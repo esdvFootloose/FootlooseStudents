@@ -54,8 +54,12 @@ def get_subscriptions(formid, as_dict=False):
         cmd = ['php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
 
     submissions = json.loads(check_output(cmd).decode())
-    props = list(submissions[0].keys())
-
+    props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
+    for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
+        if p == 'policy' or p == 'partner':
+            continue
+        props.append(p)
+    props.append('partner')
     if as_dict:
         return props, submissions
 

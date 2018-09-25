@@ -21,7 +21,7 @@ class WordpressAuthBackend:
             return None
 
         if STUDENT_LOGIN_DISABLED:
-            if 'administrator' not in wp_user['roles'] and 'bestuur' not in wp_user['roles']:
+            if 'administrator' not in wp_user['roles'] and 'um_bestuur' not in wp_user['roles']:
                 return None
         try:
             django_user = User.objects.get(username=wp_user['username'])
