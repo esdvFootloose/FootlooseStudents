@@ -26,6 +26,19 @@ def list_all_submissions_csv(request):
 
     return response
 
+@staff_member_required
+def list_all_submissions_unmerged_csv(request):
+    props, submissions = WordPress.get_subscriptions(3)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(props)
+    for submission in submissions:
+        writer.writerow(submission)
+
+    return response
 
 @staff_member_required
 def list_all_submissions(request):
