@@ -68,3 +68,41 @@ class WordPress:
             data.append(sub_data)
 
         return props, data
+
+    @staticmethod
+    def merge_subscriptions(props, submissions):
+        def to_int(n):
+            try:
+                return int(n)
+            except:
+                return n
+        #requires list output from get_subscriptions. does a logical OR on all submissions
+        #build dictionary
+        submissions_dict = {}
+        user_id_index = props.index("user_id")
+        for submission in submissions:
+            #convert all numbers in strings to actual numbers
+            submission = list(map(to_int, submission))
+            try:
+                submissions_dict[submission[user_id_index]].append(submission)
+            except KeyError:
+                submissions_dict[submission[user_id_index]] = [submission]
+
+        #logical OR on all
+        results = []
+        for person in submissions_dict.values():
+            person_merged = []
+            for i in range(len(person[0])):
+                #merge all integers using logical OR, skip user_id
+                if i == props.index("user_id"):
+                    person_merged.append(person[0][i])
+                    continue
+                if type(person[0][i]) == int:
+                    person_merged.append(int(any([x[i] for x in person])))
+                else:
+                    #if not integer take first submission by default
+                    person_merged.append(person[0][i])
+            results.append(person_merged)
+
+        #return it in same format
+        return results

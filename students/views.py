@@ -29,10 +29,11 @@ def list_all_submissions_csv(request):
 @staff_member_required
 def list_all_submissions(request):
     props, submissions = WordPress.get_subscriptions(3)
+    submissions_merged = WordPress.merge_subscriptions(props, submissions)
 
     return render(request, 'list_al_submissions.html', {
         'props' : props,
-        'submissions' : submissions,
+        'submissions' : submissions_merged,
     })
 
 
