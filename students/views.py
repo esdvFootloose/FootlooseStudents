@@ -14,13 +14,14 @@ from .wordpress import WordPress
 @staff_member_required
 def list_all_submissions_csv(request):
     props, submissions = WordPress.get_subscriptions(3)
+    submissions_merged = WordPress.merge_subscriptions(props, submissions)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
 
     writer = csv.writer(response)
     writer.writerow(props)
-    for submission in submissions:
+    for submission in submissions_merged:
         writer.writerow(submission)
 
     return response
