@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
-from subprocess import check_output
 import json
 import logging
 from django.conf import settings
 from FootlooseStudents.secret import STUDENT_LOGIN_DISABLED
+from general_vps import VPS
 
 logger = logging.getLogger('django')
 
@@ -12,11 +12,13 @@ class WordpressAuthBackend:
         if username is None or password is None:
             return None
         if settings.DEBUG:
-            wp_user =  check_output(['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-ext-auth.php', username, password.replace('&', '\&').replace('$', '\$')])
+            cmd = [username, password.replace('&', '\&').replace('$', '\$')]
         else:
-            wp_user = check_output(['php', '/usr/share/nginx/html/api-ext-auth.php', username, password])
+            cmd = [username, password]
+
+        wp_user = VPS.executeCommand('auth', cmd)
         try:
-            wp_user = json.loads(wp_user.decode())
+            wp_user = json.loads(wp_user)
         except:
             return None
 

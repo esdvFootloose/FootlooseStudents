@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h3>All interested members</h3>
+<a href="{% url 'students:listinterestedmemberscsv' %}"><button class="button success large rounded">CSV</button></a>
+<div style="overflow-x: scroll;">
+<table class="table striped table-border" data-role="table" data-rows="100">
+<thead>
+<tr>
+    <th class="sortable-column">Committee</th>
+    <th>Name</th>
+    <th>Email</th>
+</tr>
+</thead>
+<tbody>
+{% for committee, items in data.items %}
+    {% for member in items %}
+        <tr>
+            <td>{{ committee }}</td>
+            <td>{{ member.0 }}</td>
+            <td>{{ member.1 }}</td>
+        </tr>
+    {% endfor %}
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

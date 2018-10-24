@@ -1,30 +1,24 @@
-from django.conf import settings
-from subprocess import check_output
 import json
+from general_vps import VPS
+from django.core.cache import cache
+import re
 
 class WordPress:
     @staticmethod
     def get_students_data(username=None, as_dict=False):
-        if settings.DEBUG:
-            props = check_output(['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-user.php', 'props'])
-        else:
-            props = check_output(['php', '/usr/share/nginx/html/api-get-user.php', 'props'])
-        props = json.loads(props.decode())
+        if username is None and not as_dict:
+            cdata = cache.get('wordpress_student_data')
+            if cdata is not None:
+                return cdata[0], cdata[1]
+
+        props = json.loads(VPS.executeCommand('getuser', ['props']))
         #remove/move the list a bit
         props.remove('roles')
 
-
-        if settings.DEBUG:
-            cmd = ['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-user.php']
-        else:
-            cmd = ['php', '/usr/share/nginx/html/api-get-user.php']
-
+        cmd = []
         if username is not None:
             cmd += [username]
-
-        students = check_output(cmd)
-
-        students = json.loads(students.decode())
+        students = json.loads(VPS.executeCommand('getuser', cmd))
 
         if as_dict:
             return props, students
@@ -38,16 +32,15 @@ class WordPress:
                 student_data.append(student[prop])
             data.append(student_data)
 
+        if username is None and not as_dict:
+            cache.set('wordpress_student_data', (props, data), 24*60*60) #cache for 24 hours
+
         return props, data
 
     @staticmethod
     def get_subscriptions(formid, as_dict=False):
-        if settings.DEBUG:
-            cmd = ['ssh', 'footloosedirect', 'php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
-        else:
-            cmd = ['php', '/usr/share/nginx/html/api-get-form-submissions.php', str(formid)]
+        submissions = json.loads(VPS.executeCommand('formsubmissions', [str(formid)]))
 
-        submissions = json.loads(check_output(cmd).decode())
         props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
         for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
             if p == 'policy' or p == 'partner':
@@ -68,6 +61,29 @@ class WordPress:
             data.append(sub_data)
 
         return props, data
+
+    @staticmethod
+    def get_interested_members(formid):
+        cdata = cache.get('wordpress_student_interested')
+        if cdata is not None:
+            return cdata
+
+        submissions = json.loads(VPS.executeCommand('formsubmissions', [str(formid)]))
+
+        committees = {}
+        for sub in submissions:
+            name = sub['submitter']
+            email = sub['email_address']
+            interest = sub['i_might_be_interested_in_the_following_committee_s_and_would_like_to_receive_more_information_about_it']
+            for comm in re.findall(r'".*?"', interest):
+                comm = comm.strip('"')
+                if comm not in committees:
+                    committees[comm] = []
+                committees[comm].append((name, email))
+
+        cache.set('wordpress_student_interested', committees, 24*60*60) #cache for 24 hours
+
+        return committees
 
     @staticmethod
     def merge_subscriptions(props, submissions):

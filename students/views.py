@@ -80,6 +80,27 @@ def list_all_verifications(request):
         'confirmations' : Confirmation.objects.all()
     })
 
+@staff_member_required
+def list_interested_members(request):
+    return render(request, 'list_all_interested_members.html', {
+        'data' : WordPress.get_interested_members(5)
+    })
+
+@staff_member_required
+def list_interested_members_csv(request):
+    data = WordPress.get_interested_members(5)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="members.csv"'
+    csv_data = [['committee', 'name', 'email']]
+    for committee, items in data.items():
+        for member in items:
+            csv_data.append([committee, member[0], member[1]])
+
+    writer = csv.writer(response)
+    for row in csv_data:
+        writer.writerow(row)
+    return response
+
 def get_academic_year():
     today = date.today()
 
