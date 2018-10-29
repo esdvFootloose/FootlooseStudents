@@ -8,3 +8,5 @@ FootlooseStudents/secret.py
 *.json
 templates/static/admin/
 templates/static/channels/
+*.xlsx
+stats.yaml

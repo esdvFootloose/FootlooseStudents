@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'channels',
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
-    'templates.apps.TemplatesConfig'
+    'templates.apps.TemplatesConfig',
+    'analysis.apps.AnalysisConfig'
 ]
 
 MIDDLEWARE = [

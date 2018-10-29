@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'channels',
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
-    'templates.apps.TemplatesConfig'
+    'templates.apps.TemplatesConfig',
+    'analysis.apps.AnalysisConfig'
 ]
 
 MIDDLEWARE = [
@@ -93,8 +94,13 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME' : 'djangotemp',
+        'USER' : 'django',
+        'PASSWORD' : DATABASE_PASSWORD_IMPORT,
+        'HOST' : 'localhost',
+        'POST' : '',
+        'CONN_MAX_AGE': 86400  # one day
     }
 }
 

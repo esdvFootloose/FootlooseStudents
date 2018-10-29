@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<center>
+<h3 style="margin-top:2%;">Upload Subscriptions</h3>
+<form action="{{ request.get_full_path }}" method="post" enctype="multipart/form-data" novalidate>
+{%  csrf_token %}
+    <table class="table" style="width:80%;">
+        <tr><td style="width:20%;">File: </td><td>{{ form.file.errors }}<input type="file" id="id_file" name="file" data-role="file" data-button-title="<span class='mif-folder'></span>"></td></tr>
+    <tr><td></td><td><input class="button success" type="submit" value="Upload"></td></tr>
+    </table>
+</form>
+</center>
+{% endblock %}
