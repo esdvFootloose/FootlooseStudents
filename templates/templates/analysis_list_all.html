@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h3>List of all members and its subscriptions</h3>
+<div style="overflow-x: scroll;">
+<table class="table striped table-border" data-role="table" data-rows="100">
+<thead>
+<tr>
+    <th>Course</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+</tr>
+</thead>
+<tbody>
+{% for cursus in cursussen %}
+    {% for member in cursus.members.all %}
+        <tr><td>{{ cursus }}</td><td>{{ member.first_name }}</td><td>{{ member.last_name }}</td></tr>
+    {% endfor %}
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

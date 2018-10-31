@@ -2,31 +2,42 @@ from django.shortcuts import render
 from students.wordpress import WordPress
 from .models import Member, Cursus
 from django.contrib.admin.views.decorators import staff_member_required
-from .forms import XlsxUpload
+from django.contrib.auth.decorators import user_passes_test
+from .forms import XlsxUpload, Confirm
 from io import BytesIO
 from openpyxl import load_workbook
 from django.db.models import Q
 import yaml
 
-@staff_member_required
+
+@user_passes_test(lambda u: u.is_superuser)
 def load_members(request):
     #TODO: also import board and ict committee members (other UM role on site)
-    #TODO: confirmation form before deletion
+    if request.method == "POST":
+        form = Confirm(request.POST)
 
-    Member.objects.all().delete()
+        if form.is_valid():
+            Member.objects.all().delete()
 
-    props, data = WordPress.get_students_data()
+            props, data = WordPress.get_students_data(board=True)
 
-    for mdata in data:
-        m = Member()
-        m.load_from_csv(props, mdata)
-        m.save()
+            for mdata in data:
+                m = Member()
+                m.load_from_csv(props, mdata)
+                m.save()
 
-    return render(request, 'base.html', {
-        'message' : 'All members imported to analysis database!'
+            return render(request, 'base.html', {
+                'message' : 'All members imported to analysis database!'
+            })
+    else:
+        form = Confirm()
+
+    return render(request, "confirm.html", {
+        "subject" : "importing members, delete existing",
+        "form" : form
     })
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser)
 def upload_subscriptions(request):
     #TODO: do something on UTF-8
     if request.method == 'POST':
@@ -97,4 +108,10 @@ def stats(request):
 
     return render(request, 'stats.html', {
         'data' : data
+    })
+
+@staff_member_required
+def list_all(request):
+    return render(request, 'analysis_list_all.html', {
+        'cursussen' : Cursus.objects.all()
     })

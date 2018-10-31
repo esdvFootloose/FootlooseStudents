@@ -5,7 +5,7 @@ import re
 
 class WordPress:
     @staticmethod
-    def get_students_data(username=None, as_dict=False):
+    def get_students_data(username=None, as_dict=False, board=False):
         if username is None and not as_dict:
             cdata = cache.get('wordpress_student_data')
             if cdata is not None:
@@ -25,8 +25,12 @@ class WordPress:
 
         data = []
         for student in students:
-            if 'lid' not in ''.join(student['roles']):
-                continue
+            if not board:
+                if 'lid' not in ''.join(student['roles']):
+                    continue
+            else:
+                if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
+                    continue
             student_data = []
             for prop in props:
                 student_data.append(student[prop])

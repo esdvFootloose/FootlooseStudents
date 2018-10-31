@@ -10,3 +10,6 @@ class XlsxUpload(forms.Form):
             raise ValidationError("No file supplied!")
         if file.content_type != 'application/vnd.ms-excel' and file.content_type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             raise ValidationError("Not an excell file!")
+
+class Confirm(forms.Form):
+    confirm = forms.BooleanField()

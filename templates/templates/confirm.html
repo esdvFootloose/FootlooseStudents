@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h3>Confirm {{ subject }}</h3>
+<table class="table">
+<form action="{{ request.get_full_path }}" method="post">
+{%  csrf_token %}
+<tr><td style="width:20%;">Confirm:</td>
+    <td>{{ form.confirm.errors }}<input type="checkbox"  id="id_confirm" name="confirm"></td>
+</tr>
+<tr><td></td><td><input class="button success" type="submit" value="Confirm"></td></tr>
+</form>
+</table>
+{% endblock %}
