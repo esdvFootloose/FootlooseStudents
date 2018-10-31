@@ -34,7 +34,11 @@
                          </ul>
                     </li>
                 {% else  %}
+                    {% if user.username == 'prcommissie' %}
+                    <li><a href="{% url 'analysis:stats' %}">Statistics</a></li>
+                    {% else %}
                     <li><a href="{% url 'students:verify_request' %}">Verify</a></li>
+                    {% endif %}
                 {% endif %}
 
                 <li><a href="{%  url 'login:logout' %}"><span class="mif-vpn-lock icon"></span>Logout</a></li>

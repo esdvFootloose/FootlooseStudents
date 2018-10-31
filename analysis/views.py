@@ -69,7 +69,7 @@ def upload_subscriptions(request):
         'form' : form
     })
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_staff or u.username == 'prcommissie')
 def stats(request):
     #TODO: allow multiple courses to be selected
     if request.method == "POST":
