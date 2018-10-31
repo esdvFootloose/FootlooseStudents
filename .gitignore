@@ -9,4 +9,5 @@ FootlooseStudents/secret.py
 templates/static/admin/
 templates/static/channels/
 *.xlsx
-stats.yaml
+*.yaml
+TODO

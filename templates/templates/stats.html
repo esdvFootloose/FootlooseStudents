@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>Statistics</h1>
-<table class="table">
+<center>
+<form action="{{ request.get_full_path }}" method="post">
+{% csrf_token %}
+<table class="table" style="width:50%;">
+    <tr><td>Cursus:</td><td>{{ form.cursus.errors }}
+        {{ form.cursus }}
+    </td></tr>
+    <tr><td></td><td><input class="button success" type="submit" value="Filter"></td></tr>
+</table>
+</form>
+<h1>Statistics of {{ subject }}</h1>
+<table class="table" style="width:80%;">
 <thead>
 <tr>
     <th>description</th>
@@ -15,4 +25,5 @@
 {% endfor %}
 </tbody>
 </table>
+</center>
 {% endblock %}
