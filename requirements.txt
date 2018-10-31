@@ -5,3 +5,4 @@ django-redis
 daphne
 pyyaml
 openpyxl
+django-recaptcha2

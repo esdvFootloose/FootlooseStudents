@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from .secret import SECRET_KEY_IMPORT, DATABASE_PASSWORD_IMPORT
+from .secret import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
-    'analysis.apps.AnalysisConfig'
+    'analysis.apps.AnalysisConfig',
+    'snowpenguin.django.recaptcha2',
 ]
 
 MIDDLEWARE = [
@@ -170,3 +171,6 @@ STATIC_ROOT = '/home/django/FootlooseStudents/templates/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+RECAPTCHA_PRIVATE_KEY = RECAPTCHA_PRIVATE_KEY_IMPORT
+RECAPTCHA_PUBLIC_KEY = RECAPTCHA_PUBLIC_KEY_IMPORT

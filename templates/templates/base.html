@@ -1,4 +1,6 @@
 {% load staticfiles %}
+{% load recaptcha2 %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -54,7 +56,7 @@
             {% endautoescape %}
         {% endblock %}
 
-
+        {% recaptcha_init %}
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://cdn.metroui.org.ua/v4/js/metro.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
