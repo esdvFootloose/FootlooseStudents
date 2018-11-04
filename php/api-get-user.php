@@ -1,6 +1,6 @@
 <?php
 require_once('wp-config.php');
-$props = array('nickname', 'first_name', 'last_name', 'gender', 'footloose_student', 'footloose_institution', 'footloose_faculty', 'birth_date', 'phone_number', 'footloose_address', 'footloose_postcode', 'footloose_city', 'footloose_tuemail_verific', 'footloose_fontys_verific', 'footloose_otherinstitution');
+$props = array('nickname', 'first_name', 'last_name', 'gender', 'footloose_student', 'footloose_institution', 'footloose_faculty', 'birth_date', 'phone_number', 'footloose_address', 'footloose_postcode', 'footloose_city', 'footloose_tuemail_verific', 'footloose_fontys_verific', 'footloose_otherinstitution', 'footloose_campuscardnumber');
 if($argv[1] == 'props') {
     $props[] = 'email';
     $props[] = 'roles';

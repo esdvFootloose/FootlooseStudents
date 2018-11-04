@@ -24,6 +24,11 @@ foreach($subs as $sub)
             array_pop($tokens);
             $key = join('_', $tokens);
         }
+        if($value == "on") {
+            $value = "1";
+        } elseif($value == "off") {
+            $value = "0";
+        }
         $d_clean[$key] = $value;
     }
     $data[] = $d_clean;
