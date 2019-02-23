@@ -49,6 +49,8 @@ class WordPress:
         for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
             if p == 'policy' or p == 'partner':
                 continue
+            if 'consent' in p:
+                p = 'consent'
             props.append(p)
         props.append('partner')
         if as_dict:
@@ -61,7 +63,9 @@ class WordPress:
                 try:
                     sub_data.append(sub[prop])
                 except KeyError:
-                    sub_data.append('-')
+                    sub_data.append('0')
+                if sub_data[-1] == '' and 'partner' not in prop:
+                    sub_data[-1] = '0'
             data.append(sub_data)
 
         return props, data
@@ -112,16 +116,26 @@ class WordPress:
         results = []
         for person in submissions_dict.values():
             person_merged = []
-            for i in range(len(person[0])):
-                #merge all integers using logical OR, skip user_id
-                if i == props.index("user_id"):
-                    person_merged.append(person[0][i])
-                    continue
-                if type(person[0][i]) == int:
-                    person_merged.append(int(any([x[i] for x in person])))
-                else:
-                    #if not integer take first submission by default
-                    person_merged.append(person[0][i])
+            if len(person) > 1:
+                #merge is needed
+                for i in range(len(person[0])):
+                    #merge all integers using logical OR, skip user_id
+                    if i == props.index("user_id"):
+                        person_merged.append(person[0][i])
+                        continue
+                    if type(person[0][i]) == int:
+                        person_merged.append(int(any([x[i] for x in person])))
+                    else:
+                        #if not integer take first submission by default
+                        person_merged.append(person[0][i])
+                #do overriding string merge on partners
+                pi = props.index("partner")
+                person_merged[pi] = " | ".join([x[pi] for x in person])
+            else:
+                #no merge necesarry
+                person_merged = person[0]
+
+
             results.append(person_merged)
 
         #return it in same format

@@ -95,13 +95,16 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME' : 'djangotemp',
-        'USER' : 'django',
-        'PASSWORD' : DATABASE_PASSWORD_IMPORT,
-        'HOST' : 'localhost',
-        'POST' : '',
-        'CONN_MAX_AGE': 86400  # one day
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# cache
+CACHES = {
+    'default': {
+        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
 
@@ -174,6 +177,7 @@ SERVER_EMAIL = "no-reply@esdvfootloose.nl"
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'templates/static')
 
 RECAPTCHA_PRIVATE_KEY = RECAPTCHA_PRIVATE_KEY_IMPORT
 RECAPTCHA_PUBLIC_KEY = RECAPTCHA_PUBLIC_KEY_IMPORT
