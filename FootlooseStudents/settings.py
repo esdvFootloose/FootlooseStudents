@@ -51,8 +51,8 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
-    'analysis.apps.AnalysisConfig',
-    'snowpenguin.django.recaptcha2',
+    # 'analysis.apps.AnalysisConfig',
+
 ]
 
 MIDDLEWARE = [

@@ -50,8 +50,7 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
-    'analysis.apps.AnalysisConfig',
-    'snowpenguin.django.recaptcha2',
+    # 'analysis.apps.AnalysisConfig',
 ]
 
 MIDDLEWARE = [
@@ -136,7 +135,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': './debug.log',
         },
@@ -144,7 +143,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'propagate': True,
         },
     },
