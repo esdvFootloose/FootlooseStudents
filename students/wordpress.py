@@ -2,6 +2,8 @@ import json
 from general_vps import VPS
 from django.core.cache import cache
 import re
+from itertools import groupby
+from general_util import get_academic_year
 
 class WordPress:
     @staticmethod
@@ -14,23 +16,29 @@ class WordPress:
         props = json.loads(VPS.executeCommand('getuser', ['props']))
         #remove/move the list a bit
         props.remove('roles')
-
+        begin, end = get_academic_year()
         cmd = []
         if username is not None:
             cmd += [username]
-        students = json.loads(VPS.executeCommand('getuser', cmd))
+        students_raw = json.loads(VPS.executeCommand('getuser', cmd))
+
+        students = []
+        for student in students_raw:
+            if not board:
+                roles = set(student['roles'])
+                if len(roles & {'um_betaald-lid-{}-{}'.format(begin.year, end.year),
+                                'um_onbetaald-lid-{}-{}'.format(begin.year, end.year), }) == 0:
+                    continue
+            else:
+                if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
+                    continue
+            students.append(student)
 
         if as_dict:
             return props, students
 
         data = []
         for student in students:
-            if not board:
-                if 'lid' not in ''.join(student['roles']):
-                    continue
-            else:
-                if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
-                    continue
             student_data = []
             for prop in props:
                 student_data.append(student[prop])
@@ -47,15 +55,13 @@ class WordPress:
 
         props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
         for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
-            if p == 'policy' or p == 'partner':
+            if p == 'policy':
                 continue
-            if 'consent' in p:
-                p = 'consent'
             props.append(p)
-        props.append('partner')
         if as_dict:
             return props, submissions
 
+        props.remove('')
         data = []
         for sub in submissions:
             sub_data = []
@@ -63,12 +69,49 @@ class WordPress:
                 try:
                     sub_data.append(sub[prop])
                 except KeyError:
-                    sub_data.append('0')
-                if sub_data[-1] == '' and 'partner' not in prop:
-                    sub_data[-1] = '0'
+                    sub_data.append('')
+            try:
+                sub_data[props.index('_edit')] = int(sub_data[props.index('_edit')].split(':')[0])
+            except ValueError:
+                sub_data[props.index('_edit')] = -1
             data.append(sub_data)
 
         return props, data
+
+    @staticmethod
+    def get_subscriptions_objects(props, subscriptions=None):
+        if subscriptions is None:
+            subscriptions = props[1]
+            props = props[0]
+        sub_objects = []
+        subscriptions = [list(g) for k, g in groupby(sorted(subscriptions, key=lambda x: (x[props.index('user_id')],
+                                                                                          x[props.index('_edit')])),
+                                                     lambda x: x[0])]
+
+        for sub in subscriptions:
+            sub = sub[-1] # filter the latest submission
+            obj = {
+                'courses' : [[None, None] for i in range(6)]
+            }
+            for prop in sorted(props):
+                if prop in ['user_id', 'first_name', 'last_name', 'emailadres', 'student']:
+                    obj[prop] = sub[props.index(prop)]
+                    continue
+
+                if 'course_choice' in prop:
+                    course_num = int(prop.split('_')[-1])
+                    obj['courses'][course_num-1][0] = sub[props.index(prop)]
+                    continue
+
+                if 'dance_partner' in prop and 'alumni' not in prop:
+                    course_num = int(prop.split('_')[-1])
+                    obj['courses'][course_num-1][1] = sub[props.index(prop)]
+                    continue
+            sub_objects.append(obj)
+
+
+        return sub_objects
+
 
     @staticmethod
     def get_interested_members(formid):
@@ -93,50 +136,50 @@ class WordPress:
 
         return committees
 
-    @staticmethod
-    def merge_subscriptions(props, submissions):
-        def to_int(n):
-            try:
-                return int(n)
-            except:
-                return n
-        #requires list output from get_subscriptions. does a logical OR on all submissions
-        #build dictionary
-        submissions_dict = {}
-        user_id_index = props.index("user_id")
-        for submission in submissions:
-            #convert all numbers in strings to actual numbers
-            submission = list(map(to_int, submission))
-            try:
-                submissions_dict[submission[user_id_index]].append(submission)
-            except KeyError:
-                submissions_dict[submission[user_id_index]] = [submission]
-
-        #logical OR on all
-        results = []
-        for person in submissions_dict.values():
-            person_merged = []
-            if len(person) > 1:
-                #merge is needed
-                for i in range(len(person[0])):
-                    #merge all integers using logical OR, skip user_id
-                    if i == props.index("user_id"):
-                        person_merged.append(person[0][i])
-                        continue
-                    if type(person[0][i]) == int:
-                        person_merged.append(int(any([x[i] for x in person])))
-                    else:
-                        #if not integer take first submission by default
-                        person_merged.append(person[0][i])
-                #do overriding string merge on partners
-                pi = props.index("partner")
-                person_merged[pi] = " | ".join([x[pi] for x in person])
-            else:
-                #no merge necesarry
-                person_merged = person[0]
-
-
-            results.append(person_merged)
-
-        #return it in same format
-        return results
+    # @staticmethod
+    # def merge_subscriptions(props, submissions):
+    #     def to_int(n):
+    #         try:
+    #             return int(n)
+    #         except:
+    #             return n
+    #     #requires list output from get_subscriptions. does a logical OR on all submissions
+    #     #build dictionary
+    #     submissions_dict = {}
+    #     user_id_index = props.index("user_id")
+    #     for submission in submissions:
+    #         #convert all numbers in strings to actual numbers
+    #         submission = list(map(to_int, submission))
+    #         try:
+    #             submissions_dict[submission[user_id_index]].append(submission)
+    #         except KeyError:
+    #             submissions_dict[submission[user_id_index]] = [submission]
+    #
+    #     #logical OR on all
+    #     results = []
+    #     for person in submissions_dict.values():
+    #         person_merged = []
+    #         if len(person) > 1:
+    #             #merge is needed
+    #             for i in range(len(person[0])):
+    #                 #merge all integers using logical OR, skip user_id
+    #                 if i == props.index("user_id"):
+    #                     person_merged.append(person[0][i])
+    #                     continue
+    #                 if type(person[0][i]) == int:
+    #                     person_merged.append(int(any([x[i] for x in person])))
+    #                 else:
+    #                     #if not integer take first submission by default
+    #                     person_merged.append(person[0][i])
+    #             #do overriding string merge on partners
+    #             # pi = props.index("partner")
+    #             # person_merged[pi] = " | ".join([x[pi] for x in person])
+    #         else:
+    #             #no merge necesarry
+    #             person_merged = person[0]
+    #
+    #
+    #         results.append(person_merged)
+    #
+    #     #return it in same format
+    #     return results

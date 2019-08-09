@@ -2,6 +2,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from FootlooseStudents.secret import DATABASE_PASSWORD_IMPORT
 from .models import VerifyToken
 from .wordpress import WordPress
+from django.conf import settings
+from general_mail import send_mail
 
 class VerifyTokenGenerator(PasswordResetTokenGenerator):
     key_salt = DATABASE_PASSWORD_IMPORT
@@ -37,3 +39,13 @@ class VerifyTokenGenerator(PasswordResetTokenGenerator):
             return False
 
         return True
+
+def send_student_verification_mail(user):
+    props, data = WordPress.get_students_data(user.username, as_dict=True)
+    data = data[0]
+    generator = VerifyTokenGenerator()
+    token = generator.make_token(user)
+
+    url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token)
+
+    send_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'])

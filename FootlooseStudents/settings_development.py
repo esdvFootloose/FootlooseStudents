@@ -25,9 +25,13 @@ SECRET_KEY = SECRET_KEY_IMPORT
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','localhost:8080']
+HOSTNAME = "localhost:8080"
 
-AUTHENTICATION_BACKENDS = ['login.auth.WordpressAuthBackend']
+DOMAIN = "http://" + HOSTNAME
+
+ALLOWED_HOSTS = ("localhost",)
+
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', 'login.auth.WordpressAuthBackend']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -46,8 +50,7 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
-    'analysis.apps.AnalysisConfig',
-    'snowpenguin.django.recaptcha2',
+    # 'analysis.apps.AnalysisConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,24 +130,24 @@ AUTH_PASSWORD_VALIDATORS = [
     # },
 ]
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': './debug.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': 'ERROR',
+#             'class': 'logging.FileHandler',
+#             'filename': './debug.log',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'ERROR',
+#             'propagate': True,
+#         },
+#     },
+# }
 
 
 # Internationalization

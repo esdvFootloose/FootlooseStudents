@@ -26,13 +26,17 @@ SECRET_KEY = SECRET_KEY_IMPORT
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ("*",)
+HOSTNAME = 'members.esdvfootloose.nl'
 
-AUTHENTICATION_BACKENDS = ['login.auth.WordpressAuthBackend']
+DOMAIN = "https://" + HOSTNAME
+
+ALLOWED_HOSTS = (HOSTNAME,)
+
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', 'login.auth.WordpressAuthBackend']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
-SAFE_URL = ['members.esdvfootloose.nl']
+SAFE_URL = [HOSTNAME]
 
 # Application definition
 
@@ -47,8 +51,8 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
-    'analysis.apps.AnalysisConfig',
-    'snowpenguin.django.recaptcha2',
+    # 'analysis.apps.AnalysisConfig',
+
 ]
 
 MIDDLEWARE = [

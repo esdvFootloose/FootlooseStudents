@@ -1,27 +1,26 @@
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-from django.conf import settings
 import csv
 from django.http import HttpResponse
-from .util import VerifyTokenGenerator
+from .util import VerifyTokenGenerator, send_student_verification_mail
 from django.contrib.auth.decorators import login_required
 from datetime import date
-from .models import Confirmation
-from general_mail import send_mail
+from .models import Confirmation, VerifyToken
 from .wordpress import WordPress
-
+from django.contrib.auth.models import User
+from django.http import HttpResponseBadRequest
 
 @staff_member_required
 def list_all_submissions_csv(request):
     props, submissions = WordPress.get_subscriptions(3)
-    submissions_merged = WordPress.merge_subscriptions(props, submissions)
+    # submissions_merged = WordPress.merge_subscriptions(props, submissions)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
 
     writer = csv.writer(response)
     writer.writerow(props)
-    for submission in submissions_merged:
+    for submission in submissions:
         writer.writerow(submission)
 
     return response
@@ -41,19 +40,54 @@ def list_all_submissions_unmerged_csv(request):
     return response
 
 @staff_member_required
-def list_all_submissions(request):
-    props, submissions = WordPress.get_subscriptions(3)
-    submissions_merged = WordPress.merge_subscriptions(props, submissions)
+def list_submissions(request):
+    objects = WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9))
 
-    return render(request, 'list_al_submissions.html', {
+    props = [
+        'user_id',
+        'name',
+        'email',
+        'student',
+    ] + ['course choice {}'.format(i+1) for i in range(len(objects[0]['courses']))]
+    data = []
+
+    for obj in objects:
+        data.append([
+            obj['user_id'],
+            obj['first_name'] + " " + obj['last_name'],
+            obj['emailadres'],
+            obj['student'],
+        ] + ["{} - {}".format(x[0], x[1]) for x in obj['courses']])
+
+
+    return render(request, 'list_all_submissions.html', {
         'props' : props,
-        'submissions' : submissions_merged,
+        'submissions' : data,
     })
 
 
 @staff_member_required
-def list_all_students_csv(request):
-    props, students = WordPress.get_students_data()
+def list_all_students_csv(request, type):
+    if type == "wp":
+        props, students = WordPress.get_students_data()
+    elif type == "db":
+        props = ['username', 'email', 'student', 'verificated', 'verification email']
+        students = []
+        for usr in User.objects.filter(is_staff=False):
+            student = "no"
+            if hasattr(usr, "studentmeta"):
+                if usr.studentmeta.is_student:
+                    student = "yes"
+            students.append([
+                usr.username,
+                usr.email,
+                student,
+                "yes" if hasattr(usr, "verification") else "no",
+                usr.verification.email if hasattr(usr, "verification") else "",
+            ])
+    else:
+        props = []
+        students = []
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="students.csv"'
@@ -63,15 +97,36 @@ def list_all_students_csv(request):
     for student in students:
         writer.writerow(student)
 
+
     return response
 
 @staff_member_required
-def list_all_students(request):
-    props, data = WordPress.get_students_data()
+def list_all_students(request, type):
+    if type == "wp":
+        props, data = WordPress.get_students_data()
+    elif type == "db":
+        props = ['username', 'email', 'student', 'verificated', 'verification email']
+        data = []
+        for usr in User.objects.filter(is_staff=False):
+            student = "no"
+            if hasattr(usr, "studentmeta"):
+                if usr.studentmeta.is_student:
+                    student = "yes"
+            data.append([
+                usr.username,
+                usr.email,
+                student,
+                "yes" if hasattr(usr, "verification") else "no",
+                usr.verification.email if hasattr(usr, "verification") else "",
+            ])
+    # else:
+    #     props = []
+    #     data = []
 
-    return render(request, 'list_al_students.html', {
+    return render(request, 'list_all_students.html', {
         'props' : props,
         'students' : data,
+        'type': type
     })
 
 @staff_member_required
@@ -101,18 +156,6 @@ def list_interested_members_csv(request):
         writer.writerow(row)
     return response
 
-def get_academic_year():
-    today = date.today()
-
-    if today.month < 9: #before september
-        begin = date(today.year - 1,9,1)
-        end = date(today.year, 8, 31)
-    else:
-        begin = date(today.year,9,1)
-        end = date(today.year+1,8,31)
-
-    return begin, end
-
 
 @login_required
 def verify_student_request(request):
@@ -120,10 +163,10 @@ def verify_student_request(request):
         return render(request, 'base.html', {
             'message' : 'Only for students'
         })
-    begin, end = get_academic_year()
     props, data = WordPress.get_students_data(request.user.username, as_dict=True)
     data = data[0]
-    if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
+    # if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
+    if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
             'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
         })
@@ -142,39 +185,33 @@ def verify_student_request(request):
             'institute' : data['footloose_institution']
         })
 
-
-    generator = VerifyTokenGenerator()
-    token = generator.make_token(request.user)
-    if settings.DEBUG:
-        url = 'http://localhost:8080/students/verify/confirm/{}/'.format(token)
-    else:
-        url = 'https://students.edsvfootloose.nl/students/verify/confirm/{}/'.format(token)
-
-    send_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'])
+    send_student_verification_mail(request.user)
 
     return render(request, 'base.html', { 'message' : 'Verification link send' })
 
 
 
-@login_required
 def verify_student_confirm(request, token):
-    begin, end = get_academic_year()
-    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
-    data = data[0]
-    if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
+    try:
+        tokenobj = VerifyToken.objects.get(token=token)
+    except:
+        return HttpResponseBadRequest
+
+    if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
             'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
         })
 
     generator = VerifyTokenGenerator()
 
-    if not generator.check_token(request.user, token):
+    if not generator.check_token(tokenobj.user, token):
         return render(request, 'base.html', {
             'message' : 'Invalid token!'
         })
 
-    c = Confirmation(date=date.today(), user=request.user, email=data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'])
+    c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email)
     c.save()
+    tokenobj.delete()
 
     return render(request, 'base.html', {
         'message' : 'Email verified! You can now close this tab.'
