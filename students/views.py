@@ -9,6 +9,7 @@ from .models import Confirmation, VerifyToken
 from .wordpress import WordPress
 from django.contrib.auth.models import User
 from django.http import HttpResponseBadRequest
+from django.utils.safestring import mark_safe
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -105,7 +106,7 @@ def list_all_students(request, type):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
-        props = ['username', 'email', 'student', 'verificated', 'verification email']
+        props = ['username', 'email', 'student', 'verificated', 'verification email', 'Active Member']
         data = []
         for usr in User.objects.filter(is_staff=False):
             student = "no"
@@ -118,6 +119,9 @@ def list_all_students(request, type):
                 student,
                 "yes" if hasattr(usr, "verification") else "no",
                 usr.verification.email if hasattr(usr, "verification") else "",
+                mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
+                          'onchange="toggle({})" {}/>'.format(usr.studentmeta.userid,
+                                                              "checked" if usr.studentmeta.is_activemember else ""))
             ])
     # else:
     #     props = []

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
+    'distribution.apps.DistributionConfig',
     # 'analysis.apps.AnalysisConfig',
 ]
 
