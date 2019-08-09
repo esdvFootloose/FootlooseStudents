@@ -25,7 +25,11 @@ SECRET_KEY = SECRET_KEY_IMPORT
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*','localhost:8080']
+HOSTNAME = "localhost:8080"
+
+DOMAIN = "http://" + HOSTNAME
+
+ALLOWED_HOSTS = ("localhost",)
 
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend', 'login.auth.WordpressAuthBackend']
 

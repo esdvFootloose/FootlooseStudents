@@ -3,7 +3,7 @@
 
 {% block body %}
 <h3>All students</h3>
-<a href="{% url 'students:listallcsv' %}"><button class="button success large rounded">CSV</button></a>
+<a href="{% url 'students:listallcsv' type %}"><button class="button success large rounded">CSV</button></a>
 <div style="overflow-x: scroll;">
 <table class="table striped table-border" data-role="table" data-rows="100">
 <thead>

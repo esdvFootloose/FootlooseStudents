@@ -3,6 +3,7 @@ from general_vps import VPS
 from django.core.cache import cache
 import re
 from itertools import groupby
+from general_util import get_academic_year
 
 class WordPress:
     @staticmethod
@@ -15,23 +16,29 @@ class WordPress:
         props = json.loads(VPS.executeCommand('getuser', ['props']))
         #remove/move the list a bit
         props.remove('roles')
-
+        begin, end = get_academic_year()
         cmd = []
         if username is not None:
             cmd += [username]
-        students = json.loads(VPS.executeCommand('getuser', cmd))
+        students_raw = json.loads(VPS.executeCommand('getuser', cmd))
+
+        students = []
+        for student in students_raw:
+            if not board:
+                roles = set(student['roles'])
+                if len(roles & {'um_betaald-lid-{}-{}'.format(begin.year, end.year),
+                                'um_onbetaald-lid-{}-{}'.format(begin.year, end.year), }) == 0:
+                    continue
+            else:
+                if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
+                    continue
+            students.append(student)
 
         if as_dict:
             return props, students
 
         data = []
         for student in students:
-            if not board:
-                if 'lid' not in ''.join(student['roles']):
-                    continue
-            else:
-                if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
-                    continue
             student_data = []
             for prop in props:
                 student_data.append(student[prop])

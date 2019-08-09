@@ -1,5 +1,4 @@
 from smtplib import SMTPException
-from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 from django.utils.html import strip_tags
