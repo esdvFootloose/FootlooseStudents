@@ -5,9 +5,10 @@ from django.http import HttpResponse
 from .util import VerifyTokenGenerator, send_student_verification_mail
 from django.contrib.auth.decorators import login_required
 from datetime import date
-from .models import Confirmation
+from .models import Confirmation, VerifyToken
 from .wordpress import WordPress
 from django.contrib.auth.models import User
+from django.http import HttpResponseBadRequest
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -190,10 +191,12 @@ def verify_student_request(request):
 
 
 
-@login_required
 def verify_student_confirm(request, token):
-    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
-    data = data[0]
+    try:
+        tokenobj = VerifyToken.objects.get(token=token)
+    except:
+        return HttpResponseBadRequest
+
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
             'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
@@ -201,13 +204,14 @@ def verify_student_confirm(request, token):
 
     generator = VerifyTokenGenerator()
 
-    if not generator.check_token(request.user, token):
+    if not generator.check_token(tokenobj.user, token):
         return render(request, 'base.html', {
             'message' : 'Invalid token!'
         })
 
-    c = Confirmation(date=date.today(), user=request.user, email=data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'])
+    c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email)
     c.save()
+    tokenobj.delete()
 
     return render(request, 'base.html', {
         'message' : 'Email verified! You can now close this tab.'
