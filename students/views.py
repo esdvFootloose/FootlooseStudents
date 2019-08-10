@@ -203,7 +203,7 @@ def verify_student_confirm(request, token):
 
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
-            'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
+            'message' : 'You are already verified as student of {}!'.format(request.user.studentmeta.institute)
         })
 
     generator = VerifyTokenGenerator()
