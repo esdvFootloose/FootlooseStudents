@@ -167,14 +167,14 @@ def verify_student_request(request):
         return render(request, 'base.html', {
             'message' : 'Only for students'
         })
-    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
-    data = data[0]
-    # if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
+
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
-            'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
+            'message' : 'You are already verified as student of {}!'.format(request.user.studentmeta.institute)
         })
     if request.method != 'POST':
+        props, data = WordPress.get_students_data(request.user.username, as_dict=True)
+        data = data[0]
         if data['footloose_student'].lower() == 'no':
             return render(request, 'base.html', {
                 'message' : 'You have put on your subscription that you are not a student and thus cant verify. If this was in error contact ict@esdvfootloose.nl'

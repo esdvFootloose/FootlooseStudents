@@ -19,3 +19,6 @@ def api_toggle_active_member(request):
     meta.save()
 
     return HttpResponse("done")
+
+# @staff_member_required
+# def
