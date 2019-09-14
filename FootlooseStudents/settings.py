@@ -153,6 +153,17 @@ LOGGING = {
     },
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1/',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'TIMEOUT': None,
+    }
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
@@ -167,6 +178,19 @@ USE_L10N = True
 
 USE_TZ = True
 
+EMAIL_BACKEND = 'general_mail.SSLEmailBackend'
+
+# Host for sending e-mail.
+EMAIL_HOST = 'smtp.transip.email'
+
+# Port for sending e-mail.
+EMAIL_PORT = 465
+
+# SMTP authentication
+EMAIL_HOST_USER = 'ict@esdvfootloose.nl'
+EMAIL_HOST_PASSWORD = EMAIL_PASSWORD
+EMAIL_USE_TLS = True
+SERVER_EMAIL = "ict@esdvfootloose.nl"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -176,6 +200,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'templates/static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-
-RECAPTCHA_PRIVATE_KEY = RECAPTCHA_PRIVATE_KEY_IMPORT
-RECAPTCHA_PUBLIC_KEY = RECAPTCHA_PUBLIC_KEY_IMPORT

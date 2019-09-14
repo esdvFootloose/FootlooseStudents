@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def sync_database(self):
         self.stdout.write("pulling in new data from wordpress")
         begin, end = get_academic_year()
-        props, data = WordPress.get_students_data(as_dict=True)
+        props, data = WordPress.get_students_data(as_dict=True, use_cache=False)
         for obj in data:
             try:
                 meta = StudentMeta.objects.get(userid=obj['user_id'])
@@ -39,6 +39,7 @@ class Command(BaseCommand):
     def send_verifications(self):
         self.stdout.write("sending verification mails")
         begin, end = get_academic_year()
+        usrs = []
         for usr in User.objects.filter(Q(is_staff=False) & Q(studentmeta__is_student=True)):
             if hasattr(usr, "verification"):
                 if usr.verification.date < begin:
@@ -48,7 +49,8 @@ class Command(BaseCommand):
             if hasattr(usr, "verifytoken"):
                 continue
             self.stdout.write("sending mail to {} {}".format(usr.first_name, usr.last_name))
-            send_student_verification_mail(usr)
+            usrs.append(usr)
+        send_student_verification_mail(usrs)
 
 
     def clean_tokens(self):

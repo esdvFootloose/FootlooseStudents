@@ -199,7 +199,9 @@ def verify_student_confirm(request, token):
     try:
         tokenobj = VerifyToken.objects.get(token=token)
     except:
-        return HttpResponseBadRequest
+        return render(request, 'base.html', {
+            'message': 'Invalid token supplied!'
+        })
 
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
