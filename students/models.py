@@ -7,6 +7,7 @@ class StudentMeta(models.Model):
     is_student = models.BooleanField()
     userid = models.IntegerField()
     institute = models.CharField(max_length=512, default="")
+    is_activemember = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} {}".format(self.user.first_name, self.user.last_name)

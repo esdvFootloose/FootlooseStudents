@@ -9,6 +9,7 @@ from .models import Confirmation, VerifyToken
 from .wordpress import WordPress
 from django.contrib.auth.models import User
 from django.http import HttpResponseBadRequest
+from django.utils.safestring import mark_safe
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -105,7 +106,7 @@ def list_all_students(request, type):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
-        props = ['username', 'email', 'student', 'verificated', 'verification email']
+        props = ['username', 'email', 'student', 'verificated', 'verification email', 'Active Member']
         data = []
         for usr in User.objects.filter(is_staff=False):
             student = "no"
@@ -118,6 +119,9 @@ def list_all_students(request, type):
                 student,
                 "yes" if hasattr(usr, "verification") else "no",
                 usr.verification.email if hasattr(usr, "verification") else "",
+                mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
+                          'onchange="toggle({})" {}/>'.format(usr.studentmeta.userid,
+                                                              "checked" if usr.studentmeta.is_activemember else ""))
             ])
     # else:
     #     props = []
@@ -163,14 +167,14 @@ def verify_student_request(request):
         return render(request, 'base.html', {
             'message' : 'Only for students'
         })
-    props, data = WordPress.get_students_data(request.user.username, as_dict=True)
-    data = data[0]
-    # if request.user.confirmations.filter(date__gt=begin, date__lt=end).count() > 0:
+
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
-            'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
+            'message' : 'You are already verified as student of {}!'.format(request.user.studentmeta.institute)
         })
     if request.method != 'POST':
+        props, data = WordPress.get_students_data(request.user.username, as_dict=True)
+        data = data[0]
         if data['footloose_student'].lower() == 'no':
             return render(request, 'base.html', {
                 'message' : 'You have put on your subscription that you are not a student and thus cant verify. If this was in error contact ict@esdvfootloose.nl'
@@ -195,11 +199,13 @@ def verify_student_confirm(request, token):
     try:
         tokenobj = VerifyToken.objects.get(token=token)
     except:
-        return HttpResponseBadRequest
+        return render(request, 'base.html', {
+            'message': 'Invalid token supplied!'
+        })
 
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
-            'message' : 'You are already verified as student of {}!'.format(data['footloose_institution'])
+            'message' : 'You are already verified as student of {}!'.format(request.user.studentmeta.institute)
         })
 
     generator = VerifyTokenGenerator()

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'students.apps.StudentsConfig',
     'templates.apps.TemplatesConfig',
+    'distribution.apps.DistributionConfig',
     # 'analysis.apps.AnalysisConfig',
 ]
 
@@ -106,8 +107,12 @@ DATABASES = {
 # cache
 CACHES = {
     'default': {
-        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'TIMEOUT': None,
     }
 }
 
@@ -169,18 +174,29 @@ EMAIL_HOST = 'localhost'
 # Port for sending e-mail.
 EMAIL_PORT = 1025
 
-# Optional SMTP authentication information for EMAIL_HOST.
+# SMTP authentication
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
-SERVER_EMAIL = "no-reply@esdvfootloose.nl"
+SERVER_EMAIL = "ict@esdvfootloose.nl"
 
+# EMAIL_BACKEND = 'general_mail.SSLEmailBackend'
+#
+#
+# # Host for sending e-mail.
+# EMAIL_HOST = 'smtp.transip.email'
+#
+# # Port for sending e-mail.
+# EMAIL_PORT = 465
+#
+# # SMTP authentication
+# EMAIL_HOST_USER = 'ict@esdvfootloose.nl'
+# EMAIL_HOST_PASSWORD = EMAIL_PASSWORD
+# EMAIL_USE_TLS = True
+# SERVER_EMAIL = "ict@esdvfootloose.nl"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'templates/static')
-
-RECAPTCHA_PRIVATE_KEY = RECAPTCHA_PRIVATE_KEY_IMPORT
-RECAPTCHA_PUBLIC_KEY = RECAPTCHA_PUBLIC_KEY_IMPORT

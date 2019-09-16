@@ -7,16 +7,26 @@ from general_util import get_academic_year
 
 class WordPress:
     @staticmethod
-    def get_students_data(username=None, as_dict=False, board=False):
-        if username is None and not as_dict:
-            cdata = cache.get('wordpress_student_data')
+    def get_students_data(username=None, as_dict=False, board=False, year=None, use_cache=True):
+        if use_cache:
+            cdata = cache.get('wordpress_student_data_{}'.format(as_dict))
             if cdata is not None:
-                return cdata[0], cdata[1]
+                if username is None:
+                    return cdata[0], cdata[1]
+                else:
+                    for d in cdata[1]:
+                        if d['nickname'] == username:
+                            return cdata[0], [d]
+
+
 
         props = json.loads(VPS.executeCommand('getuser', ['props']))
         #remove/move the list a bit
         props.remove('roles')
-        begin, end = get_academic_year()
+        if year is None:
+            begin, end = get_academic_year()
+        else:
+            begin, end = year
         cmd = []
         if username is not None:
             cmd += [username]
@@ -35,6 +45,9 @@ class WordPress:
             students.append(student)
 
         if as_dict:
+            if username is None:
+                cache.set('wordpress_student_data_{}'.format(as_dict), (props, students),
+                          24 * 60 * 60)  # cache for 24 hours
             return props, students
 
         data = []
@@ -44,8 +57,8 @@ class WordPress:
                 student_data.append(student[prop])
             data.append(student_data)
 
-        if username is None and not as_dict:
-            cache.set('wordpress_student_data', (props, data), 24*60*60) #cache for 24 hours
+        if username is None:
+            cache.set('wordpress_student_data_{}'.format(as_dict), (props, data), 24*60*60) #cache for 24 hours
 
         return props, data
 

@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {%  load staticfiles %}
 
+{#https://gitbrent.github.io/bootstrap4-toggle/#}
+
+{% block stylesheets %}
+
+{% endblock %}
+
 {% block body %}
 <h3>All students</h3>
 <a href="{% url 'students:listallcsv' type %}"><button class="button success large rounded">CSV</button></a>
@@ -35,4 +41,11 @@
 {#    {column_number: 3, filter_type: "select"},#}
 {#]);#}
 {#</script>#}
+<script>
+function toggle(id) {
+    $.get("{% url 'distribution:api_toggleactivemember' %}" + "?id=" + id
+    );
+}
+</script>
+
 {% endblock %}
