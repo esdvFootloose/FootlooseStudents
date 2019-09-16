@@ -137,7 +137,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/home/django/django.log',
+            'filename': './django.log',
         },
 #        'mail_admins': {
 #            'level': 'ERROR',
