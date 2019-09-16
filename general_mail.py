@@ -17,7 +17,7 @@ def build_mail(subject, email_template_name, context, to_email):
     # generate html email
     html_email = loader.render_to_string(email_template_name, context)
     # attach text and html message
-    email_message = mail.EmailMultiAlternatives(subject, strip_tags(html_email), 'website@esdvfootloose.nl', [to_email])
+    email_message = mail.EmailMultiAlternatives(subject, strip_tags(html_email), 'ict@esdvfootloose.nl', [to_email])
     email_message.attach_alternative(html_email, 'text/html')
     return email_message
     # # send
