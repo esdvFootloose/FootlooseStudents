@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<br/>
+Please confirm your student status by clicking below button:<br/>
+<form method="post" action="">
+{% csrf_token %}
+<input data-prepend="Student Email" type="text" data-role="input" value="{{ email }}" disabled >
+<input class="button success" type="submit" value="Confirm">
+</form>
+{% endblock %}
