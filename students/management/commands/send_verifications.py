@@ -14,11 +14,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.clean_tokens()
-        # self.sync_database()
+        self.sync_database()
         self.send_verifications()
 
     def sync_database(self):
         #TODO: double check domain of email address
+        # TODO: check uniqueness of emails
         self.stdout.write("pulling in new data from wordpress")
         begin, end = get_academic_year()
         props, data = WordPress.get_students_data(as_dict=True, use_cache=False)
