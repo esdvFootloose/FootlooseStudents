@@ -198,27 +198,36 @@ def verify_student_request(request):
 def verify_student_confirm(request, token):
     try:
         tokenobj = VerifyToken.objects.get(token=token)
-    except:
+    except VerifyToken.DoesNotExist:
         return render(request, 'base.html', {
-            'message': 'Invalid token supplied!'
+            'message' : 'This token is invalid or already used. Please contact ict@esdvfootloose.nl with your name and emailaddress'
         })
 
     if hasattr(request.user, "verification"):
         return render(request, 'base.html', {
-            'message' : 'You are already verified as student of {}!'.format(request.user.studentmeta.institute)
+            'message' : 'You are already verified as student of {}'.format(request.user.studentmeta.institute)
         })
 
-    generator = VerifyTokenGenerator()
+    if request.method == "POST":
+        generator = VerifyTokenGenerator()
 
-    if not generator.check_token(tokenobj.user, token):
+        if not generator.check_token(tokenobj.user, token):
+            return render(request, 'base.html', {
+                'message' : 'Invalid token!'
+            })
+
+        c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email)
+        c.save()
+        tokenobj.delete()
+
         return render(request, 'base.html', {
-            'message' : 'Invalid token!'
+            'message' : 'Email verified! You can now close this tab.'
         })
 
-    c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email)
-    c.save()
-    tokenobj.delete()
-
-    return render(request, 'base.html', {
-        'message' : 'Email verified! You can now close this tab.'
-    })
+    else:
+        data = WordPress.get_students_data(tokenobj.user.username, as_dict=True)[1][0]
+        email = data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else \
+            data['footloose_fontys_verific']
+        return render(request, 'confirmform.html', {
+            'email':  email
+        })
