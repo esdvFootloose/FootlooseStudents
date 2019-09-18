@@ -48,6 +48,10 @@ class Command(BaseCommand):
         self.stdout.write("sending verification mails")
         begin, end = get_academic_year()
         usrs = []
+        # transip has a limit of 200 emails per 24 hour. when we hit it, there is no way of telling which mail was send and which not
+        # so to make sure to keep below the limit never send create a batch larger then 150
+        # students who are not in this batch will be processed in the next run
+        i = 0
         for usr in User.objects.filter(Q(is_staff=False) & Q(studentmeta__is_student=True)):
             if hasattr(usr, "verification"):
                 if usr.verification.date < begin:
@@ -56,8 +60,11 @@ class Command(BaseCommand):
                     continue
             if hasattr(usr, "verifytoken"):
                 continue
+            if i >= 150:
+                break
             self.stdout.write("sending mail to {} {}".format(usr.first_name, usr.last_name))
             usrs.append(usr)
+            i += 1
         send_student_verification_mail(usrs)
 
 
