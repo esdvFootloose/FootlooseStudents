@@ -16,6 +16,7 @@ class StudentMeta(models.Model):
 class Confirmation(models.Model):
     date = models.DateField()
     email = models.EmailField()
+    ip = models.GenericIPAddressField()
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification')
 
     def __str__(self):
