@@ -10,6 +10,7 @@ from .wordpress import WordPress
 from django.contrib.auth.models import User
 from django.http import HttpResponseBadRequest
 from django.utils.safestring import mark_safe
+from ipware import get_client_ip
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -216,7 +217,7 @@ def verify_student_confirm(request, token):
                 'message' : 'Invalid token!'
             })
 
-        c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email)
+        c = Confirmation(date=date.today(), user=tokenobj.user, email=tokenobj.email, ip=get_client_ip(request)[0])
         c.save()
         tokenobj.delete()
 
