@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseBadRequest, HttpResponse
 from students.models import StudentMeta
+from .models import CourseType, Course
 
 @staff_member_required
 def api_toggle_active_member(request):
@@ -20,5 +21,12 @@ def api_toggle_active_member(request):
 
     return HttpResponse("done")
 
-# @staff_member_required
-# def
+@staff_member_required
+def list_course_types(request):
+    return render(request, 'list_courses.html', {
+        'coursetypes': CourseType.objects.all()
+    })
+
+@staff_member_required
+def manual_distribute(request, pk):
+    ctype = get_object_or_404(CourseType, pk=pk)

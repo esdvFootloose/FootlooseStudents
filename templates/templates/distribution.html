@@ -1,0 +1,12 @@
+{% load static %}
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Distribute for course {{ course }}</h1>
+<a href="" class="button success">Save all</a><a href="" class="button warning">Mail all</a>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static "js/jquery-ui.sortable.min.js" %}"></script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Choose a course type to distribute</h1>
+<table class="table">
+{% for type in coursetypes %}
+<tr>
+<td><a href="{% url 'distribution:manualdistribute' type.pk %}" class="button info">{{ type }}</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
