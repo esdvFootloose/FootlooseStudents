@@ -54,6 +54,7 @@ class Distribution(models.Model):
     couple = models.ForeignKey(Couple, on_delete=models.PROTECT, related_name='distributions')
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='distributions')
     reason = models.IntegerField(choices=reason_choices)
+    admitted = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} for course {} with reason {}".format(self.couple, self.course, self.get_reason_display())

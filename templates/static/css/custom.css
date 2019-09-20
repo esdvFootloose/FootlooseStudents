@@ -14,7 +14,7 @@ td.admitted {
 
 td.rejected {
     height: 250px;
-    background-color: red;
+    background-color: indianred;
     border: 1px solid white;
 }
 

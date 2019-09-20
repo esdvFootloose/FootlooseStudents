@@ -9,5 +9,7 @@ def create_couple_block(couple):
     else:
         status = "-"
     return mark_safe(
-        "<li class=\"member\" couple-id=\"{}\">{}<br/>{}<br/>{}</li>".format(couple.pk, leader, follower, status)
+        "<li class=\"member\" data-couple-id=\"{}\">"
+        "{}<br/>{}<br/>{}<br/><a class='button alert' onclick='delete_couple_block(this);'>delete<a/>"
+        "</li>".format(couple.pk, leader, follower, status)
     )

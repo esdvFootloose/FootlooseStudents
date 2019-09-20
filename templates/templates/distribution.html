@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load  custom_filters %}
 
 {% block stylesheets %}
     <style>
@@ -31,12 +32,12 @@
 
 {% block body %}
 <h1>Distribute for course type {{ type }}</h1>
-<a href="" class="button success">Save all</a><a href="" class="button warning">Mail all</a>
+<button onclick="save_all();" class="button success">Save all</button><a href="" class="button warning">Mail all</a>
 <table class="table">
 <thead>
 <tr>
 {% for course in courses %}
-    <th>{{ course }}</th>
+    <th>{{ course.0 }} <button onclick="save_course('{{ course.0.get_machine_name }}');" class="button success">Save</button> </th>
 {% endfor %}
 <th>Couple Maker</th>
 </tr>
@@ -45,8 +46,10 @@
 <tr>
 {% for course in courses %}
     <td class="admitted" >
-    <ul class="memberList admitted" id="admitted_{{ course.get_machine_name }}">
-
+    <ul class="memberList admitted" data-course-id="{{ course.0.pk }}" id="admitted_{{ course.0.get_machine_name }}">
+        {% for distr in course.1 %}
+            {{ distr.couple|couple_to_li }}
+        {% endfor %}
     </ul>
     </td>
 {% endfor %}
@@ -90,8 +93,10 @@
 <tr>
  {% for course in courses %}
     <td class="rejected" >
-    <ul class="memberList rejected" id="rejected_{{ course.get_machine_name }}">
-
+    <ul class="memberList rejected" data-course-id="{{ course.0.pk }}" id="rejected_{{ course.0.get_machine_name }}">
+        {% for distr in course.2 %}
+            {{ distr.couple|couple_to_li }}
+        {% endfor %}
     </ul>
     </td>
 {% endfor %}
@@ -131,6 +136,46 @@ function create_couple() {
      }, function(data){
          $("#couplecreator_list").append(data);
      });
+}
+
+function save_course(course) {
+    var list_admitted = Array($("#admitted_" + course + " li"));
+    var list_rejected = Array($("#rejected_" + course + " li"));
+    var coursepk = $("#admitted_" + course).attr('data-course-id');
+    var couples_admitted_ids = [];
+    var couples_rejected_ids = [];
+
+    list_admitted.forEach(function(i){
+        couples_admitted_ids.push(i.data('couple-id'));
+    });
+
+    list_rejected.forEach(function(i){
+        couples_rejected_ids.push(i.data('couple-id'));
+    });
+
+    var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
+        data: JSON.stringify({ admitted: 1, couples: couples_admitted_ids})},
+    function(data){
+
+    });
+
+    var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
+        data: JSON.stringify({ admitted: 0, couples: couples_rejected_ids})},
+    function(data){
+
+    });
+
+}
+
+function delete_couple_block(block){
+    block.parentElement.remove();
+    return false;
+}
+
+function save_all(){
+    {% for course in courses %}
+        save_course('{{ course.0.get_machine_name }}');
+    {% endfor %}
 }
 
 $("ul.memberList").sortable({
