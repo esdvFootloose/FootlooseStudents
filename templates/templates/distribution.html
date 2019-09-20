@@ -1,12 +1,142 @@
-{% load static %}
 {% extends 'base.html' %}
+{% load static %}
 
-{% block body %}
-<h1>Distribute for course {{ course }}</h1>
-<a href="" class="button success">Save all</a><a href="" class="button warning">Mail all</a>
+{% block stylesheets %}
+    <style>
+        ul.memberList {
+            margin: 0;
+            padding: 0;
+            {#background-color: grey;#}
+            min-height: 20px;
+            user-select: none; /*disable text selection*/
+        }
+
+        li.member {
+            list-style: none;
+            background-color: lightblue;
+            border: 1px solid white;
+        }
+
+        li.member > div.btn {
+            width: 100%;
+            text-align: left;
+        }
+
+        td {
+            width: 20%;
+        }
+    </style>
 
 {% endblock %}
 
+{% block body %}
+<h1>Distribute for course type {{ type }}</h1>
+<a href="" class="button success">Save all</a><a href="" class="button warning">Mail all</a>
+<table class="table">
+<thead>
+<tr>
+{% for course in courses %}
+    <th>{{ course }}</th>
+{% endfor %}
+<th>Couple Maker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+{% for course in courses %}
+    <td class="admitted" >
+    <ul class="memberList admitted" id="admitted_{{ course.get_machine_name }}">
+
+    </ul>
+    </td>
+{% endfor %}
+<td style="width:25%;">
+    <table class="table">
+        <tr>
+            <td style="width:5%;">Leader:</td>
+            <td>
+                <select data-role="select" id="couplecreator_leader">
+                {% for user in users %}
+                    <option value="{{ user.pk }}">{{ user }}</option>
+                {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:5%;">Follower:</td>
+            <td>
+                <select data-role="select" id="couplecreator_follower">
+                {% for user in users %}
+                    <option value="{{ user.pk }}">{{ user }}</option>
+                {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><button class="button primary" onclick="create_couple();">Create</button> </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <ul class="memberList" id="couplecreator_list">
+
+                </ul>
+            </td>
+        </tr>
+    </table>
+</td>
+</tr>
+<tr>
+ {% for course in courses %}
+    <td class="rejected" >
+    <ul class="memberList rejected" id="rejected_{{ course.get_machine_name }}">
+
+    </ul>
+    </td>
+{% endfor %}
+<td></td>
+</tr>
+</tbody>
+</table>
+{% endblock %}
+
 {% block scripts %}
+{% csrf_token %}
 <script src="{% static "js/jquery-ui.sortable.min.js" %}"></script>
+
+<script>
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+
+function create_couple() {
+    var leaderid = $("#couplecreator_leader").val();
+    var followerid = $("#couplecreator_follower").val();
+
+     var jqxhr = $.post("{% url 'distribution:api_createcouple' %}", {
+        leaderid: leaderid,
+         followerid: followerid,
+     }, function(data){
+         $("#couplecreator_list").append(data);
+     });
+}
+
+$("ul.memberList").sortable({
+    connectWith: "ul.memberList",
+    placeholder: "", /*here any custom classes for a just-before-drop UL can be defined*/
+});
+
+</script>
 {% endblock %}

@@ -5,3 +5,23 @@
 /*table {*/
     /*table-layout:fixed;*/
 /*}*/
+
+td.admitted {
+    height: 250px;
+    background-color: green;
+    border: 1px solid white;
+}
+
+td.rejected {
+    height: 250px;
+    background-color: red;
+    border: 1px solid white;
+}
+
+ul.admitted {
+    background-color: darkgreen;
+}
+
+ul.rejected {
+    background-color: darkred;
+}

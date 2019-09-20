@@ -19,10 +19,22 @@ class Course(models.Model):
             return "{} {}".format(self.name, self.levelname)
         return "{} {}".format(self.name, self.level)
 
+    def get_machine_name(self):
+        return  self.__str__().replace(' ', '_')
+
 class Couple(models.Model):
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='couples_leader')
     follower = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True,
                                  related_name='couples_follower')
+
+    def get_highest_status(self):
+        if self.leader.studentmeta.is_activemember or self.follower.studentmeta.is_activemember:
+            return "active_member"
+
+        if self.leader.studentmeta.is_student or self.follower.studentmeta.is_student:
+            return "student"
+
+        return None
 
     def __str__(self):
         if self.follower is not None:
