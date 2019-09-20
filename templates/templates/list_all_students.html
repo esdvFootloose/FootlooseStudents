@@ -42,8 +42,13 @@
 {#]);#}
 {#</script>#}
 <script>
-function toggle(id) {
+function toggle_activemember(id) {
     $.get("{% url 'distribution:api_toggleactivemember' %}" + "?id=" + id
+    );
+}
+
+function toggle_student(id) {
+    $.get("{% url 'distribution:api_togglestudent' %}" + "?id=" + id
     );
 }
 </script>

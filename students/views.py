@@ -107,21 +107,19 @@ def list_all_students(request, type):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
-        props = ['username', 'email', 'student', 'verificated', 'verification email', 'Active Member']
+        props = ['Username', 'Email', 'Student', 'Verified', 'Verification Email', 'Active Member']
         data = []
         for usr in User.objects.filter(is_staff=False):
-            student = "no"
-            if hasattr(usr, "studentmeta"):
-                if usr.studentmeta.is_student:
-                    student = "yes"
             data.append([
                 usr.username,
                 usr.email,
-                student,
+                mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
+                          ' onchange="toggle_student({})" {}/>'.format(usr.studentmeta.userid,
+                                                              "checked" if usr.studentmeta.is_student else "")),
                 "yes" if hasattr(usr, "verification") else "no",
                 usr.verification.email if hasattr(usr, "verification") else "",
                 mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
-                          'onchange="toggle({})" {}/>'.format(usr.studentmeta.userid,
+                          ' onchange="toggle_activemember({})" {}/>'.format(usr.studentmeta.userid,
                                                               "checked" if usr.studentmeta.is_activemember else ""))
             ])
     # else:

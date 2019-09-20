@@ -40,6 +40,7 @@
 {#                             {% endif %}#}
 {#                         </ul>#}
 {#                    </li>#}
+                    <li><a href="{% url 'distribution:listcoursetypes' %}">Distribution</a> </li>
                 {% else  %}
                     {% if user.username == 'prcommissie' %}
                     <li><a href="{% url 'analysis:stats' %}">Statistics</a></li>

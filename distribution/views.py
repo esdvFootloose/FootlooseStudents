@@ -22,6 +22,23 @@ def api_toggle_active_member(request):
     return HttpResponse("done")
 
 @staff_member_required
+def api_toggle_student(request):
+    id = request.GET.get('id', -1)
+
+    if id == -1:
+        return HttpResponseBadRequest()
+
+    try:
+        meta = StudentMeta.objects.get(userid=id)
+    except StudentMeta.DoesNotExist:
+        return HttpResponseBadRequest()
+
+    meta.is_student = not meta.is_student
+    meta.save()
+
+    return HttpResponse("done")
+
+@staff_member_required
 def list_course_types(request):
     return render(request, 'list_courses.html', {
         'coursetypes': CourseType.objects.all()
@@ -30,3 +47,7 @@ def list_course_types(request):
 @staff_member_required
 def manual_distribute(request, pk):
     ctype = get_object_or_404(CourseType, pk=pk)
+    return render(request, 'distribution.html', {
+        'type': ctype,
+        'courses': ctype.course_set.all()
+    })
