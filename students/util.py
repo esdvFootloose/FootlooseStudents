@@ -50,6 +50,12 @@ def send_student_verification_mail(users):
 
         url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token)
 
-        emails.append(build_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'] if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific']))
+        # for now only tue and fontuys
+        if data['footloose_institution'] not in [
+            'Eindhoven University of Technology',
+            'Fontys'
+        ]:
+            continue
+        emails.append(build_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'].strip() if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'].strip()))
 
     send_mail(emails)

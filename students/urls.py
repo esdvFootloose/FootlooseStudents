@@ -14,6 +14,9 @@ urlpatterns = [
     path('verify/confirm/<slug:token>/', views.verify_student_confirm, name='verify_confirm'),
     path('list/verifications/', views.list_all_verifications, name='listverifications'),
 
+    path('list/invalids/', views.list_invalids, name='listinvalids'),
+    path('list/invalids/<slug:t>/', views.list_invalids, name='listinvalids'),
+
     path('list/<slug:type>/', views.list_all_students, name='listall'),
     path('list/<slug:type>/csv/', views.list_all_students_csv, name='listallcsv'),
 ]
