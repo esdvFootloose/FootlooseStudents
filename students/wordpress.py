@@ -75,6 +75,8 @@ class WordPress:
             return props, submissions
 
         props.remove('')
+        if '_edit' not in props:
+            props.append('_edit')
         data = []
         for sub in submissions:
             sub_data = []

@@ -12,15 +12,15 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--no-sync', dest='no_sync', action='store_true',
                             help='dont sync new members from wordpress, send verifications to already synced members')
-        parser.add_argument('--only-sync', dest='only_sync', action='store_true',
-                            help='only sync new members from wordpress, dont send verifications yet')
+        parser.add_argument('--no-send', dest='no_send', action='store_true',
+                            help=' dont send verifications yet')
         parser.set_defaults(no_sync=False, only_sync=False)
 
     def handle(self, *args, **options):
         self.clean_tokens()
         if not options['no_sync']:
             self.sync_database()
-        if not options['only_sync']:
+        if not options['no_send']:
             self.send_verifications()
 
     def sync_database(self):

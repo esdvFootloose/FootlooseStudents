@@ -107,21 +107,19 @@ def list_all_students(request, type):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
-        props = ['username', 'email', 'student', 'verificated', 'verification email', 'Active Member']
+        props = ['Username', 'Email', 'Student', 'Verified', 'Verification Email', 'Active Member']
         data = []
         for usr in User.objects.filter(is_staff=False):
-            student = "no"
-            if hasattr(usr, "studentmeta"):
-                if usr.studentmeta.is_student:
-                    student = "yes"
             data.append([
                 usr.username,
                 usr.email,
-                student,
+                mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
+                          ' onchange="toggle_student({})" {}/>'.format(usr.studentmeta.userid,
+                                                              "checked" if usr.studentmeta.is_student else "")),
                 "yes" if hasattr(usr, "verification") else "no",
                 usr.verification.email if hasattr(usr, "verification") else "",
                 mark_safe('<input type="checkbox" data-role="switch" data-material="true"'
-                          'onchange="toggle({})" {}/>'.format(usr.studentmeta.userid,
+                          ' onchange="toggle_activemember({})" {}/>'.format(usr.studentmeta.userid,
                                                               "checked" if usr.studentmeta.is_activemember else ""))
             ])
     # else:
@@ -133,6 +131,54 @@ def list_all_students(request, type):
         'students' : data,
         'type': type
     })
+
+
+@staff_member_required
+def list_invalids(request, t='table'):
+    users = User.objects.filter(studentmeta__is_student=True)
+    invalids = []
+    for usr in users:
+        props, data = WordPress.get_students_data(usr.username, as_dict=True)
+        data = data[0]
+        if data['footloose_institution'] == 'Eindhoven University of Technology':
+            domain = data['footloose_tuemail_verific'].split('@')[-1].strip()
+            if domain not in ['student.tue.nl', 'tue.nl']:
+                invalids.append([
+                        usr.username,
+                        data['footloose_institution'],
+                        data['footloose_tuemail_verific'],
+                        data['email']
+                    ]
+                )
+        elif data['footloose_institution'] == 'Fontys':
+            domain = data['footloose_fontys_verific'].split('@')[-1].strip()
+            if domain not in ['student.fontys.nl', 'fontys.nl']:
+                invalids.append([
+                        usr.username,
+                        data['footloose_institution'],
+                        data['footloose_fontys_verific'],
+                        data['email']
+                    ]
+                )
+        else:
+            continue
+
+    if t == 'table':
+        return render(request, 'list_all_invalids.html', {
+            'props': ['username', 'institution', 'student email', 'contact email'],
+            'students': invalids
+        })
+    elif t == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="invalids.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['username', 'institution', 'student email', 'contact email'])
+        writer.writerows(invalids)
+
+        return response
+
+
 
 @staff_member_required
 def list_all_verifications(request):

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from distribution.models import Course
+from distribution.models import Course, CourseType
 
 
 class Command(BaseCommand):
@@ -33,8 +33,10 @@ class Command(BaseCommand):
         }
 
         for c in courses:
+            ctype = CourseType(name=c[0])
+            ctype.save()
             for i in range(c[1]):
-                obj = Course(name=c[0],level=i+1)
+                obj = Course(name=ctype,level=i+1)
                 if c[0] in names:
                     obj.levelname = names[c[0]][i]
                 obj.save()
