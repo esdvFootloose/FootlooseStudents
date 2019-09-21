@@ -37,7 +37,9 @@
 <thead>
 <tr>
 {% for course in courses %}
-    <th>{{ course.0 }} <button onclick="save_course('{{ course.0.get_machine_name }}');" class="button success">Save</button> </th>
+    <th>{{ course.0 }}
+{#        <button onclick="save_course('{{ course.0.get_machine_name }}');" class="button success">Save</button>#}
+    </th>
 {% endfor %}
 <th>Couple Maker</th>
 </tr>
@@ -139,30 +141,28 @@ function create_couple() {
 }
 
 function save_course(course) {
-    var list_admitted = Array($("#admitted_" + course + " li"));
-    var list_rejected = Array($("#rejected_" + course + " li"));
     var coursepk = $("#admitted_" + course).attr('data-course-id');
     var couples_admitted_ids = [];
     var couples_rejected_ids = [];
 
-    list_admitted.forEach(function(i){
-        couples_admitted_ids.push(i.data('couple-id'));
+    $("#admitted_" + course + " li").each(function(){
+        couples_admitted_ids.push($(this).data('couple-id'));
     });
 
-    list_rejected.forEach(function(i){
-        couples_rejected_ids.push(i.data('couple-id'));
+    $("#rejected_" + course + " li").each(function(){
+        couples_rejected_ids.push($(this).data('couple-id'));
     });
 
     var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
         data: JSON.stringify({ admitted: 1, couples: couples_admitted_ids})},
     function(data){
-
+        Metro.notify.create(data);
     });
 
     var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
         data: JSON.stringify({ admitted: 0, couples: couples_rejected_ids})},
     function(data){
-
+        Metro.notify.create(data);
     });
 
 }

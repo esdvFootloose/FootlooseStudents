@@ -63,15 +63,21 @@ def api_save_distributions(request, pk):
     t = bool(data['admitted'])
     for distr in Distribution.objects.filter(course=course, admitted=t):
         if distr.couple.pk not in data['couples']:
-            distr.delete()
-    for couple_pk in data['couples']:
+            try:
+                distr.delete()
+            except:
+                return HttpResponse("Database error when deleting distribution for course {} {}".format(course,
+                                                                                                      "admitted" if t else "rejected"))
+    for couple_pk in set(data['couples']):
         couple = get_object_or_404(Couple, pk=couple_pk)
         if Distribution.objects.filter(couple=couple, course=course, admitted=t).exists():
             continue
+        try:
+            Distribution(couple=couple, course=course, reason=0, admitted=t).save()
+        except:
+            return HttpResponse("Database error when saving distribution for course {} {}".format(course, "admitted" if t else "rejected"))
 
-        Distribution(couple=couple, course=course, reason=0, admitted=t).save()
-
-    return HttpResponse("Saved for course {}".format(course))
+    return HttpResponse("Saved course {} {}".format(course, "admitted" if t else "rejected"))
 
 
 @staff_member_required
