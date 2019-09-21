@@ -13,6 +13,7 @@ class Course(models.Model):
     level = models.IntegerField()
     levelname = models.CharField(max_length=512, null=True, blank=True)
     limit = models.IntegerField(default=24)
+    coupledance = models.BooleanField(default=False)
 
     def __str__(self):
         if self.levelname is not None:
