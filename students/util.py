@@ -45,17 +45,17 @@ def send_student_verification_mail(users):
     for user in users:
         props, data = WordPress.get_students_data(user.username, as_dict=True)
         data = data[0]
-        generator = VerifyTokenGenerator()
-        token = generator.make_token(user)
-
-        url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token)
-
         # for now only tue and fontuys
         if data['footloose_institution'] not in [
             'Eindhoven University of Technology',
             'Fontys'
         ]:
             continue
+        generator = VerifyTokenGenerator()
+        token = generator.make_token(user)
+
+        url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token)
+
         emails.append(build_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'].strip() if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'].strip()))
 
     send_mail(emails)
