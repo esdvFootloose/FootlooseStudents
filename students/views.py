@@ -116,13 +116,17 @@ def list_all_students_csv(request, type):
     return response
 
 @staff_member_required
-def list_all_students(request, type):
+def list_all_students(request, type, onlynonverified=0):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
         props = ['Username', 'Email', 'Student', 'Verified', 'Verification Email', 'Active Member']
         data = []
-        for usr in User.objects.filter(is_staff=False):
+        if onlynonverified:
+            QS = User.objects.filter(is_staff=False, verification__isnull=True, studentmeta__is_student=True)
+        else:
+            QS = User.objects.filter(is_staff=False)
+        for usr in QS:
             data.append([
                 usr.username,
                 usr.email,
