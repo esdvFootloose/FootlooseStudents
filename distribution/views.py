@@ -13,6 +13,7 @@ import unicodedata
 from django import forms
 import random
 from .forms import Confirm
+import csv
 
 def strip_accents(text):
     return ''.join(c for c in unicodedata.normalize('NFKD', text) if unicodedata.category(c) != 'Mn')
@@ -282,9 +283,47 @@ def automatic_distribute_step2(request):
         for couple in total[course.limit:]:
             Distribution(couple=couple, course=course, reason=1, admitted=False).save()
 
-
-
-
     return render(request, 'base.html', {
         'message': 'Distribution done, you can view it at manual distribution menu'
     })
+
+@staff_member_required
+def list_all_distributions(request):
+    return render(request, 'list_all_distributions.html', {
+        'couples': Couple.objects.filter(distributions__admitted=True).distinct()
+    })
+
+@staff_member_required
+def distributions_csv_per_couple(request):
+    props = [
+        'person A',
+        'person B',
+        'courses'
+    ]
+
+    data = [[str(c.leader), str(c.follower), "|".join([str(d.course) for d in c.get_admitted_courses()])] for c in Couple.objects.filter(distributions__admitted=True).distinct()]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="distributions_couples.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(props)
+    writer.writerows(data)
+
+    return response
+
+
+@staff_member_required
+def distributions_csv_per_course(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="distributions_courses.csv"'
+    writer = csv.writer(response)
+
+    for course in Course.objects.all().order_by('name', 'level'):
+        writer.writerow([str(course), ''])
+        for distr in course.distributions.all().order_by('couple__leader'):
+            writer.writerow([str(distr.couple.leader), str(distr.couple.follower)])
+        writer.writerow([' ',' '])
+
+    return response
+
