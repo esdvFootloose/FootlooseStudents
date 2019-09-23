@@ -196,7 +196,9 @@ def list_invalids(request, t='table'):
 @staff_member_required
 def list_all_verifications(request):
     return render(request, 'list_all_verifications.html', {
-        'confirmations' : Confirmation.objects.all()
+        'confirmations': Confirmation.objects.all(),
+        'numconfirmations': Confirmation.objects.count(),
+        'numverifytokens': VerifyToken.objects.count()
     })
 
 @staff_member_required
