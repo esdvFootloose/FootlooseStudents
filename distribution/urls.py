@@ -11,4 +11,6 @@ urlpatterns = [
 
     path('listtypes/', views.list_course_types, name='listcoursetypes'),
     path('distribute/manual/<int:pk>/', views.manual_distribute, name='manualdistribute'),
+    path('distribute/manual/step/1/', views.automatic_distribute_step1, name='automaticdistribute_step1'),
+    path('distribute/manual/step/2/', views.automatic_distribute_step2, name='automaticdistribute_step2')
 ]

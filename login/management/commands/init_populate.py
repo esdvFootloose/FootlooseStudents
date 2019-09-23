@@ -41,4 +41,4 @@ class Command(BaseCommand):
                     obj.levelname = names[c[0]][i]
                 obj.save()
 
-        Course(name=CourseType.objects.get(name='hiphop'), level=4, levelname='demo team').save()
+        Course(name=CourseType.objects.get(name='hiphop'), level=4, levelname='demoteam').save()

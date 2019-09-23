@@ -29,11 +29,22 @@ class Couple(models.Model):
                                  related_name='couples_follower')
 
     def get_highest_status(self):
-        if self.leader.studentmeta.is_activemember or self.follower.studentmeta.is_activemember:
+        if self.leader.studentmeta.is_activemember:
             return "active_member"
+        if self.leader.studentmeta.is_student:
+            if hasattr(self.leader, 'verifytoken') or hasattr(self.leader, 'verifytoken'):
+                return "student_eindhoven"
+            else:
+                return "student"
 
-        if self.leader.studentmeta.is_student or self.follower.studentmeta.is_student:
-            return "student"
+        if self.follower is not None:
+            if self.follower.studentmeta.is_activemember:
+                return "active_member"
+            if self.follower.studentmeta.is_student:
+                if hasattr(self.follower, 'verifytoken') or hasattr(self.follower, 'verifytoken'):
+                    return "student_eindhoven"
+                else:
+                    return "student"
 
         return None
 
@@ -46,10 +57,7 @@ class Couple(models.Model):
 class Distribution(models.Model):
     reason_choices = (
         (0, "manual"),
-        (1, "active member"),
-        (2, "student"),
-        (3, "lottery"),
-        (4, "else")
+        (1, "automatic"),
     )
 
     couple = models.ForeignKey(Couple, on_delete=models.PROTECT, related_name='distributions')

@@ -37,7 +37,7 @@ class WordPress:
             if not board:
                 roles = set(student['roles'])
                 if len(roles & {'um_betaald-lid-{}-{}'.format(begin.year, end.year),
-                                'um_onbetaald-lid-{}-{}'.format(begin.year, end.year), }) == 0:
+                                'um_onbetaald-lid-{}-{}'.format(begin.year, end.year), 'um_bestuur' }) == 0:
                     continue
             else:
                 if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():

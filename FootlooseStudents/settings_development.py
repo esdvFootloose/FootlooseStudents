@@ -180,6 +180,8 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 SERVER_EMAIL = "ict@esdvfootloose.nl"
 
+PASSWORD_RESET_TIMEOUT_DAYS = 14
+
 # EMAIL_BACKEND = 'general_mail.SSLEmailBackend'
 #
 #

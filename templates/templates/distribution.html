@@ -4,6 +4,9 @@
 
 {% block stylesheets %}
     <style>
+        td {
+            vertical-align: top !important;
+        }
         ul.memberList {
             margin: 0;
             padding: 0;
@@ -71,6 +74,7 @@
             <td style="width:5%;">Follower:</td>
             <td>
                 <select data-role="select" id="couplecreator_follower">
+                <option value="-1">None</option>
                 {% for user in users %}
                     <option value="{{ user.pk }}">{{ user }}</option>
                 {% endfor %}

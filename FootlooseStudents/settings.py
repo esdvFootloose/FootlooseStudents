@@ -192,6 +192,8 @@ EMAIL_HOST_PASSWORD = EMAIL_PASSWORD
 EMAIL_USE_TLS = True
 SERVER_EMAIL = "ict@esdvfootloose.nl"
 
+PASSWORD_RESET_TIMEOUT_DAYS = 14
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
