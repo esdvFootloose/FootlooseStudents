@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>All distributions per couple</h1>
+<a href="{% url 'distribution:listdistributions_couples_csv' %}"><button class="button primary">CSV per couple</button></a>
+<a href="{% url 'distribution:listdistributions_courses_csv' %}"><button class="button primary">CSV per course</button></a>
+<table class="table striped table-border" data-role="table" data-rows="100">
+    <thead>
+    <tr>
+        <th class="sortable-column">Person A</th>
+        <th class="sortable-column">Person B</th>
+        <th>Courses</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for couple in couples %}
+        <tr>
+            <td>{{ couple.leader }}</td>
+            <td>{{ couple.follower }}</td>
+            <td>
+            <ul>
+                {% for course in couple.get_admitted_courses %}
+                    <li>{{ course.course }}</li>
+                {% endfor %}
+            </ul>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

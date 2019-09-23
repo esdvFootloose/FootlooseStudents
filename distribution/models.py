@@ -23,6 +23,9 @@ class Course(models.Model):
     def get_machine_name(self):
         return  self.__str__().replace(' ', '_')
 
+    def get_couples(self):
+        return self.distributions.filter(admitted=True).order_by('couple')
+
 class Couple(models.Model):
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='couples_leader')
     follower = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True,
@@ -53,6 +56,9 @@ class Couple(models.Model):
             return "{} with {}".format(self.leader, self.follower)
         else:
             return str(self.leader)
+
+    def get_admitted_courses(self):
+        return self.distributions.filter(admitted=True).order_by('course')
 
 class Distribution(models.Model):
     reason_choices = (
