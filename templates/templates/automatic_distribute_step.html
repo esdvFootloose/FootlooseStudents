@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block stylesheets %}
+<style>
+th {
+    width: 20%;
+    text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<h1>Match names manually</h1>
+These could not be matched automatically. <br/>
+If a name is non matchable leave it at ---. That person will then be discarded.
+<form method="post" action="{% url 'distribution:automaticdistribute_step2' %}">
+{% csrf_token %}
+{#<table  class="table">#}
+{#    {% for name in names %}#}
+{#    <tr>#}
+{#    <td style="width:20%;">{{ name }}</td>#}
+{#    <td>#}
+{#        <select data-role="select" id="{{ name }}" name="{{ name }}">#}
+{#                <option value="-1">---</option>#}
+{#            {% for user in users %}#}
+{#                <option value="{{ user.pk }}">{{ user }}</option>#}
+{#            {% endfor %}#}
+{#        </select>#}
+{#    </td>#}
+{#    </tr>#}
+{#    {% endfor %}#}
+{#    <tr>#}
+{#        <td></td>#}
+{#        <td><input class="button success" type="submit" value="Continue"></td>#}
+{#    </tr>#}
+{#</table>#}
+{#</form>#}
+<table class="table">
+{{ form.as_table }}
+    <tr>
+        <td></td>
+        <td><input class="button success" type="submit" value="Continue"></td>
+    </tr>
+</table>
+{% endblock %}

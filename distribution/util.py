@@ -8,6 +8,13 @@ def create_couple_block(couple):
         status = status[0].upper()
     else:
         status = "-"
+
+    if hasattr(couple.leader, 'verifytoken'):
+        leader = "<div style=\"color:red;\">{}</div>".format(leader)
+    if hasattr(couple.follower, 'verifytoken'):
+        follower = "<div style=\"color:red;\">{}</div>".format(follower)
     return mark_safe(
-        "<li class=\"member\" couple-id=\"{}\">{}<br/>{}<br/>{}</li>".format(couple.pk, leader, follower, status)
+        "<li class=\"member\" data-couple-id=\"{}\">"
+        "{} {}<button class=\"button secondary\">{}</button><button class='button alert' onclick='delete_couple_block(this);'>Delete</button>"
+        "</li>".format(couple.pk, leader, follower, status)
     )

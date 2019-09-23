@@ -8,38 +8,51 @@ from datetime import date
 from .models import Confirmation, VerifyToken
 from .wordpress import WordPress
 from django.contrib.auth.models import User
-from django.http import HttpResponseBadRequest
 from django.utils.safestring import mark_safe
 from ipware import get_client_ip
 
 @staff_member_required
 def list_all_submissions_csv(request):
-    props, submissions = WordPress.get_subscriptions(3)
-    # submissions_merged = WordPress.merge_subscriptions(props, submissions)
+    objects = WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9))
+
+    props = [
+        'user_id',
+        'name',
+        'email',
+        'student',
+    ] + ['course choice {}'.format(i+1) for i in range(len(objects[0]['courses']))]
+    data = []
+
+    for obj in objects:
+        data.append([
+            obj['user_id'],
+            obj['first_name'] + " " + obj['last_name'],
+            obj['emailadres'],
+            obj['student'],
+        ] + ["{} - {}".format(x[0], x[1]) for x in obj['courses']])
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
 
     writer = csv.writer(response)
     writer.writerow(props)
-    for submission in submissions:
-        writer.writerow(submission)
+    writer.writerows(data)
 
     return response
 
-@staff_member_required
-def list_all_submissions_unmerged_csv(request):
-    props, submissions = WordPress.get_subscriptions(3)
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(props)
-    for submission in submissions:
-        writer.writerow(submission)
-
-    return response
+# @staff_member_required
+# def list_all_submissions_unmerged_csv(request):
+#     props, submissions = WordPress.get_subscriptions(3)
+#
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
+#
+#     writer = csv.writer(response)
+#     writer.writerow(props)
+#     for submission in submissions:
+#         writer.writerow(submission)
+#
+#     return response
 
 @staff_member_required
 def list_submissions(request):
@@ -103,13 +116,17 @@ def list_all_students_csv(request, type):
     return response
 
 @staff_member_required
-def list_all_students(request, type):
+def list_all_students(request, type, onlynonverified=0):
     if type == "wp":
         props, data = WordPress.get_students_data()
     elif type == "db":
         props = ['Username', 'Email', 'Student', 'Verified', 'Verification Email', 'Active Member']
         data = []
-        for usr in User.objects.filter(is_staff=False):
+        if onlynonverified:
+            QS = User.objects.filter(is_staff=False, verification__isnull=True, studentmeta__is_student=True)
+        else:
+            QS = User.objects.filter(is_staff=False)
+        for usr in QS:
             data.append([
                 usr.username,
                 usr.email,
@@ -183,7 +200,9 @@ def list_invalids(request, t='table'):
 @staff_member_required
 def list_all_verifications(request):
     return render(request, 'list_all_verifications.html', {
-        'confirmations' : Confirmation.objects.all()
+        'confirmations': Confirmation.objects.all(),
+        'numconfirmations': Confirmation.objects.count(),
+        'numverifytokens': VerifyToken.objects.count()
     })
 
 @staff_member_required

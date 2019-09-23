@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load  custom_filters %}
 
 {% block stylesheets %}
     <style>
+        td {
+            vertical-align: top !important;
+        }
         ul.memberList {
             margin: 0;
             padding: 0;
@@ -31,12 +35,14 @@
 
 {% block body %}
 <h1>Distribute for course type {{ type }}</h1>
-<a href="" class="button success">Save all</a><a href="" class="button warning">Mail all</a>
+<button onclick="save_all();" class="button success">Save all</button><a href="" class="button warning">Mail all</a>
 <table class="table">
 <thead>
 <tr>
 {% for course in courses %}
-    <th>{{ course }}</th>
+    <th>{{ course.0 }} Couple limit: {{ course.0.limit }}
+        <button onclick="clear_course('{{ course.0.get_machine_name }}');" class="button alert">Clear</button>
+    </th>
 {% endfor %}
 <th>Couple Maker</th>
 </tr>
@@ -45,8 +51,10 @@
 <tr>
 {% for course in courses %}
     <td class="admitted" >
-    <ul class="memberList admitted" id="admitted_{{ course.get_machine_name }}">
-
+    <ul class="memberList admitted" data-course-id="{{ course.0.pk }}" id="admitted_{{ course.0.get_machine_name }}">
+        {% for distr in course.1 %}
+            {{ distr.couple|couple_to_li }}
+        {% endfor %}
     </ul>
     </td>
 {% endfor %}
@@ -66,6 +74,7 @@
             <td style="width:5%;">Follower:</td>
             <td>
                 <select data-role="select" id="couplecreator_follower">
+                <option value="-1">None</option>
                 {% for user in users %}
                     <option value="{{ user.pk }}">{{ user }}</option>
                 {% endfor %}
@@ -90,8 +99,10 @@
 <tr>
  {% for course in courses %}
     <td class="rejected" >
-    <ul class="memberList rejected" id="rejected_{{ course.get_machine_name }}">
-
+    <ul class="memberList rejected" data-course-id="{{ course.0.pk }}" id="rejected_{{ course.0.get_machine_name }}">
+        {% for distr in course.2 %}
+            {{ distr.couple|couple_to_li }}
+        {% endfor %}
     </ul>
     </td>
 {% endfor %}
@@ -131,6 +142,48 @@ function create_couple() {
      }, function(data){
          $("#couplecreator_list").append(data);
      });
+}
+
+function save_course(course) {
+    var coursepk = $("#admitted_" + course).attr('data-course-id');
+    var couples_admitted_ids = [];
+    var couples_rejected_ids = [];
+
+    $("#admitted_" + course + " li").each(function(){
+        couples_admitted_ids.push($(this).data('couple-id'));
+    });
+
+    $("#rejected_" + course + " li").each(function(){
+        couples_rejected_ids.push($(this).data('couple-id'));
+    });
+
+    var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
+        data: JSON.stringify({ couples_rejected: couples_rejected_ids, couples_admitted: couples_admitted_ids})},
+    function(data){
+        Metro.notify.create(data);
+    });
+
+}
+
+function clear_course(course) {
+    $("#admitted_" + course + " li").each(function() {
+        $(this).remove();
+    });
+
+    $("#rejected_" + course + " li").each(function() {
+        $(this).remove();
+    });
+}
+
+function delete_couple_block(block){
+    block.parentElement.remove();
+    return false;
+}
+
+function save_all(){
+    {% for course in courses %}
+        save_course('{{ course.0.get_machine_name }}');
+    {% endfor %}
 }
 
 $("ul.memberList").sortable({

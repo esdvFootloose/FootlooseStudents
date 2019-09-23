@@ -24,7 +24,6 @@ class Command(BaseCommand):
             self.send_verifications()
 
     def sync_database(self):
-        #TODO: double check domain of email address
         # TODO: check uniqueness of emails
         self.stdout.write("pulling in new data from wordpress")
         begin, end = get_academic_year()
@@ -32,12 +31,16 @@ class Command(BaseCommand):
         for obj in data:
             try:
                 meta = StudentMeta.objects.get(userid=obj['user_id'])
-
             except StudentMeta.DoesNotExist:
-                # assuming that if no meta also no user
-                user = User(username=obj['nickname'], first_name=obj['first_name'], last_name=obj['last_name'], email=obj['email'])
-                user.save()
-                meta = StudentMeta(user=user, userid=obj['user_id'])
+                try:
+                    user = User.objects.get(username=obj['nickname'])
+                except User.DoesNotExist:
+                    user = User(username=obj['nickname'], first_name=obj['first_name'], last_name=obj['last_name'], email=obj['email'])
+                    user.save()
+                try:
+                    meta = user.studentmeta
+                except StudentMeta.DoesNotExist:
+                    meta = StudentMeta(user=user, userid=obj['user_id'])
             meta.is_student = obj['footloose_student'].lower() == 'yes'
             meta.institute = obj['footloose_institution']
             meta.save()
