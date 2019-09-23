@@ -64,31 +64,53 @@ def api_create_couple(request):
 
     return HttpResponse(create_couple_block(couple))
 
+def remove_distributions(course, couples_pk, admitted):
+    for distr in Distribution.objects.filter(course=course, admitted=admitted):
+        if distr.couple.pk not in couples_pk:
+            try:
+                distr.delete()
+            except:
+                return HttpResponse("Database error when deleting distribution for course {} admitted".format(course))
+
+def add_distributions(course, couples_pk, admitted):
+    for couple_pk in set(couples_pk):
+        couple = get_object_or_404(Couple, pk=couple_pk)
+        if Distribution.objects.filter(couple=couple, course=course, admitted=admitted).exists():
+            continue
+        try:
+            Distribution(couple=couple, course=course, reason=0, admitted=admitted).save()
+        except:
+            return HttpResponse("Database error when saving distribution for course {} admitted".format(course))
+
 @staff_member_required
 @require_POST
 def api_save_distributions(request, pk):
     course = get_object_or_404(Course, pk=pk)
     data = json.loads(request.POST['data'])
-    if None in data['couples']:
-        data['couples'].remove(None)
-    t = bool(data['admitted'])
-    for distr in Distribution.objects.filter(course=course, admitted=t):
-        if distr.couple.pk not in data['couples']:
-            try:
-                distr.delete()
-            except:
-                return HttpResponse("Database error when deleting distribution for course {} {}".format(course,
-                                                                                                      "admitted" if t else "rejected"))
-    for couple_pk in set(data['couples']):
-        couple = get_object_or_404(Couple, pk=couple_pk)
-        if Distribution.objects.filter(couple=couple, course=course, admitted=t).exists():
-            continue
-        try:
-            Distribution(couple=couple, course=course, reason=0, admitted=t).save()
-        except:
-            return HttpResponse("Database error when saving distribution for course {} {}".format(course, "admitted" if t else "rejected"))
+    if None in data['couples_admitted']:
+        data['couples_admitted'].remove(None)
+    if None in data['couples_rejected']:
+        data['couples_rejected'].remove(None)
 
-    return HttpResponse("Saved course {} {}".format(course, "admitted" if t else "rejected"))
+    if len(set(data['couples_admitted']) & set(data['couples_rejected'])) != 0:
+        return HttpResponse("There are couples in both admitted and rejected for course {}! Not able to save".format(course))
+
+    r = remove_distributions(course, data['couples_admitted'], True)
+    if r is not None:
+        return r
+
+    r = remove_distributions(course, data['couples_rejected'], False)
+    if r is not None:
+        return r
+
+    r = add_distributions(course, data['couples_admitted'], True)
+    if r is not None:
+        return r
+    r = add_distributions(course, data['couples_rejected'], False)
+    if r is not None:
+        return r
+
+    return HttpResponse("Saved course {}".format(course))
 
 
 @staff_member_required

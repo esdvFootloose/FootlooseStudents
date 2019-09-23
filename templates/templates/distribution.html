@@ -41,7 +41,7 @@
 <tr>
 {% for course in courses %}
     <th>{{ course.0 }} Couple limit: {{ course.0.limit }}
-{#        <button onclick="save_course('{{ course.0.get_machine_name }}');" class="button success">Save</button>#}
+        <button onclick="clear_course('{{ course.0.get_machine_name }}');" class="button alert">Clear</button>
     </th>
 {% endfor %}
 <th>Couple Maker</th>
@@ -158,17 +158,21 @@ function save_course(course) {
     });
 
     var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
-        data: JSON.stringify({ admitted: 1, couples: couples_admitted_ids})},
+        data: JSON.stringify({ couples_rejected: couples_rejected_ids, couples_admitted: couples_admitted_ids})},
     function(data){
         Metro.notify.create(data);
     });
 
-    var jqxhr = $.post("{% url 'distribution:api_savedistributions' %}" + String(coursepk) + "/",{
-        data: JSON.stringify({ admitted: 0, couples: couples_rejected_ids})},
-    function(data){
-        Metro.notify.create(data);
+}
+
+function clear_course(course) {
+    $("#admitted_" + course + " li").each(function() {
+        $(this).remove();
     });
 
+    $("#rejected_" + course + " li").each(function() {
+        $(this).remove();
+    });
 }
 
 function delete_couple_block(block){
