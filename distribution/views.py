@@ -197,10 +197,12 @@ def automatic_distribute_step1(request):
             'subject': 'This will delete all existing distributions and couples, please confirm',
             'form': form
         })
-
+    # delete all old distributions
     Distribution.objects.all().delete()
+    # calculate the couples from the submissions and report back the non matchable names
     nonmatchable_persons = create_couples_from_submissions(
             WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)))[1]
+    # setup a form with fields of non matchable names
     form = forms.Form()
     for person in nonmatchable_persons:
         name = strip_accents(person).replace(' ', '').lower()
@@ -216,11 +218,12 @@ def automatic_distribute_step1(request):
 @staff_member_required
 @require_POST
 def automatic_distribute_step2(request):
-
+    # user has manually matched the non matchable names, rerun the create couples system with this input
     subscriptions_per_course_couples = create_couples_from_submissions(
             WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)), dict(request.POST)
         )[0]
 
+    # iterate all courses and couples and create distributions
     for coursename, couples in subscriptions_per_course_couples.items():
         ctype = CourseType.objects.get(name=coursename.split(' ')[0].lower())
         try:
@@ -228,8 +231,15 @@ def automatic_distribute_step2(request):
         except:
             course = Course.objects.get(name=ctype, levelname=''.join(coursename.split(' ')[1:]).lower())
 
-        r = random.SystemRandom()
+        # auto reject all couples with no partner for the dances that need a partner
+        if course.coupledance:
+            for couple in couples:
+                if couple.follower is None:
+                    couples.remove(couple)
+                    Distribution(couple=couple, course=course, reason=1, admitted=False).save()
 
+        r = random.SystemRandom()
+        # select according to policy the different types of students and shuffle them randomly within the catogory
         active_members = [c for c in couples if c.get_highest_status() == "active_member"]
         r.shuffle(active_members)
         students_eindhoven = [c for c in couples if c.get_highest_status() == "student_eindhoven"]
@@ -241,9 +251,12 @@ def automatic_distribute_step2(request):
 
         total = active_members + students_eindhoven + students + other
 
+        # create distributions until the couple limit of the course
+        # the total list is already put in the right order according to policy
+        # so simple iterate through it until limit
         for couple in total[:course.limit]:
             Distribution(couple=couple, course=course, reason=1, admitted=True).save()
-
+        # set everything above to limit to rejected
         for couple in total[course.limit:]:
             Distribution(couple=couple, course=course, reason=1, admitted=False).save()
 
