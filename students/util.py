@@ -4,6 +4,7 @@ from .models import VerifyToken
 from .wordpress import WordPress
 from django.conf import settings
 from general_mail import build_mail, send_mail
+from datetime import date
 
 class VerifyTokenGenerator(PasswordResetTokenGenerator):
     key_salt = DATABASE_PASSWORD_IMPORT
@@ -57,5 +58,20 @@ def send_student_verification_mail(users):
         url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token)
 
         emails.append(build_mail('Footloose Student Verification', 'mail/verify.html', {'url' : url}, data['footloose_tuemail_verific'].strip() if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'].strip()))
+
+    send_mail(emails)
+
+def send_student_reminders_mail(users):
+    emails = []
+    for user in users:
+        props, data = WordPress.get_students_data(user.username, as_dict=True)
+        data = data[0]
+        token = user.verifytoken
+        token.reminded = date.today()
+        token.save()
+
+        url = "{}/students/verify/confirm/{}/".format(settings.DOMAIN, token.token)
+
+        emails.append(build_mail('Footloose Student Verification', 'mail/verify_reminder.html', {'url': url}, data['footloose_tuemail_verific'].strip() if data['footloose_institution'] == 'Eindhoven University of Technology' else data['footloose_fontys_verific'].strip()))
 
     send_mail(emails)
