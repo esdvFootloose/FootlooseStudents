@@ -4,10 +4,15 @@ def create_couple_block(couple):
     leader = couple.leader
     follower = couple.follower
     status = couple.get_highest_status()
-    if status is not None:
-        status = status[0].upper()
+    if status == 'student':
+        status_text = 'S'
+    elif status == 'student_eindhoven':
+        status_text = 'E|S'
+    elif status == 'active_member':
+        status_text = 'A'
+
     else:
-        status = "-"
+        status_text = "-"
 
     if hasattr(couple.leader, 'verifytoken'):
         leader = "<div style=\"color:red;\">{}</div>".format(leader)
@@ -20,5 +25,5 @@ def create_couple_block(couple):
     return mark_safe(
         "<li class=\"member\" data-couple-id=\"{}\">"
         "{} {}<button class=\"button secondary\">{}</button><button class='button alert' onclick='delete_couple_block(this);'>Delete</button>"
-        "</li>".format(couple.pk, leader, follower, status)
+        "</li>".format(couple.pk, leader, follower, status_text)
     )
