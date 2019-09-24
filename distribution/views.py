@@ -233,7 +233,7 @@ def automatic_distribute_step1(request):
     form = forms.Form()
     for person in nonmatchable_persons:
         name = strip_accents(person).replace(' ', '').lower()
-        form.fields[name] = forms.ModelChoiceField(User.objects.all(), label=person)
+        form.fields[name] = forms.ModelChoiceField(User.objects.all(), label=person, widget=forms.Select(attrs={'data-role': 'select'}))
         form.fields[name].required = False
 
     return render(request, 'automatic_distribute_step.html', {
