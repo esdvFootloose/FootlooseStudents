@@ -177,10 +177,15 @@ def create_couples_from_submissions(objects, matched_persons={}):
                             follower = User.objects.get(username__contains=name)
                         except (User.DoesNotExist, User.MultipleObjectsReturned):
                             # fuzzy search needed
-                            nonmatchable_persons.append(couple[1])
-                            continue
+                            if matched_persons == {}:
+                                nonmatchable_persons.append(couple[1])
+                                continue
+                            else:
+                                follower = None
+            else:
+                follower = None
 
-
+            if follower is not None:
                 # see if this couple already exists
                 try:
                     couple_obj = Couple.objects.get(leader=leader, follower=follower)
@@ -192,7 +197,6 @@ def create_couples_from_submissions(objects, matched_persons={}):
                         couple_obj = Couple(leader=leader, follower=follower)
                         couple_obj.save()
             else:
-                follower = None
                 try:
                     couple_obj = Couple.objects.get(leader=leader, follower__isnull=True)
                 except Couple.DoesNotExist:
@@ -255,21 +259,24 @@ def automatic_distribute_step2(request):
             course = Course.objects.get(name=ctype, levelname=''.join(coursename.split(' ')[1:]).lower())
 
         # auto reject all couples with no partner for the dances that need a partner
+        couples_elligble = []
+
         if course.coupledance:
             for couple in couples:
                 if couple.follower is None:
-                    couples.remove(couple)
                     Distribution(couple=couple, course=course, reason=1, admitted=False).save()
+                else:
+                    couples_elligble.append(couple)
 
         r = random.SystemRandom()
         # select according to policy the different types of students and shuffle them randomly within the catogory
-        active_members = [c for c in couples if c.get_highest_status() == "active_member"]
+        active_members = [c for c in couples_elligble if c.get_highest_status() == "active_member"]
         r.shuffle(active_members)
-        students_eindhoven = [c for c in couples if c.get_highest_status() == "student_eindhoven"]
+        students_eindhoven = [c for c in couples_elligble if c.get_highest_status() == "student_eindhoven"]
         r.shuffle(students_eindhoven)
-        students = [c for c in couples if c.get_highest_status() == "student"]
+        students = [c for c in couples_elligble if c.get_highest_status() == "student"]
         r.shuffle(students)
-        other = [c for c in couples if c.get_highest_status() not in  ["active_member", "student", "student_eindhoven"]]
+        other = [c for c in couples_elligble if c.get_highest_status() not in  ["active_member", "student", "student_eindhoven"]]
         r.shuffle(other)
 
         total = active_members + students_eindhoven + students + other
