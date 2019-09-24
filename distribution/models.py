@@ -32,24 +32,36 @@ class Couple(models.Model):
                                  related_name='couples_follower')
 
     def get_highest_status(self):
+        status = -1
         if self.leader.studentmeta.is_activemember:
-            return "active_member"
+            status = 3
         if self.leader.studentmeta.is_student:
-            if hasattr(self.leader, 'verifytoken') or hasattr(self.leader, 'verifytoken'):
-                return "student_eindhoven"
+            if hasattr(self.leader, 'verification') or hasattr(self.leader, 'verifytoken'):
+                if status < 2:
+                    status = 2
             else:
-                return "student"
+                if status < 1:
+                    status = 1
 
         if self.follower is not None:
             if self.follower.studentmeta.is_activemember:
-                return "active_member"
+                status = 3
             if self.follower.studentmeta.is_student:
-                if hasattr(self.follower, 'verifytoken') or hasattr(self.follower, 'verifytoken'):
-                    return "student_eindhoven"
+                if hasattr(self.follower, 'verification') or hasattr(self.follower, 'verifytoken'):
+                    if status < 2:
+                        status = 2
                 else:
-                    return "student"
+                    if status < 1:
+                        status = 1
 
-        return None
+        if status == 3:
+            return "active_member"
+        elif status == 2:
+            return "student_eindhoven"
+        elif status == 1:
+            return "student"
+        else:
+            return None
 
     def __str__(self):
         if self.follower is not None:
