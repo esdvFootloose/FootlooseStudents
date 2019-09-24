@@ -25,6 +25,7 @@ class Confirmation(models.Model):
 
 class VerifyToken(models.Model):
     created = models.DateField(default=datetime.date.today)
+    reminded = models.DateField(default=datetime.date.today)
     email = models.EmailField()
     token = models.CharField(max_length=32)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verifytoken')
