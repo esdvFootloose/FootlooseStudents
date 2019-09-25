@@ -5,6 +5,8 @@ from .wordpress import WordPress
 from django.conf import settings
 from general_mail import build_mail, send_mail
 from datetime import date
+from django.utils.http import base36_to_int
+from django.utils.crypto import constant_time_compare
 
 class VerifyTokenGenerator(PasswordResetTokenGenerator):
     key_salt = DATABASE_PASSWORD_IMPORT
@@ -25,8 +27,22 @@ class VerifyTokenGenerator(PasswordResetTokenGenerator):
         return token
 
     def check_token(self, user, token):
-        if not super().check_token(user, token):
+        if not (user and token):
             return False
+
+        try:
+            ts_b36, _ = token.split("-")
+        except ValueError:
+            return False
+
+        try:
+            ts = base36_to_int(ts_b36)
+        except ValueError:
+            return False
+
+        if not constant_time_compare(self._make_token_with_timestamp(user, ts), token):
+            return False
+
         try:
             tokenmodel = user.verifytoken
         except:
