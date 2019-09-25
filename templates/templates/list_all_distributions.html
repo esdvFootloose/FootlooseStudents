@@ -3,7 +3,8 @@
 {% block body %}
 <h1>All distributions per couple</h1>
 <a href="{% url 'distribution:listdistributions_couples_csv' %}"><button class="button primary">CSV per couple</button></a>
-<a href="{% url 'distribution:listdistributions_courses_csv' %}"><button class="button primary">CSV per course</button></a>
+<a href="{% url 'distribution:listdistributions_courses_csv' 0 %}"><button class="button primary">CSV per course (couples)</button></a>
+<a href="{% url 'distribution:listdistributions_courses_csv' 1 %}"><button class="button primary">CSV per course (email)</button></a>
 <table class="table striped table-border" data-role="table" data-rows="100">
     <thead>
     <tr>

@@ -267,6 +267,8 @@ def automatic_distribute_step2(request):
                     Distribution(couple=couple, course=course, reason=1, admitted=False).save()
                 else:
                     couples_elligble.append(couple)
+        else:
+            couples_elligble = couples
 
         r = random.SystemRandom()
         # select according to policy the different types of students and shuffle them randomly within the catogory
@@ -321,15 +323,23 @@ def distributions_csv_per_couple(request):
 
 
 @staff_member_required
-def distributions_csv_per_course(request):
+def distributions_csv_per_course(request, email=0):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="distributions_courses.csv"'
     writer = csv.writer(response)
 
     for course in Course.objects.all().order_by('name', 'level'):
         writer.writerow([str(course), ''])
-        for distr in course.distributions.all().order_by('couple__leader'):
-            writer.writerow([str(distr.couple.leader), str(distr.couple.follower)])
+        for distr in course.distributions.filter(admitted=True).order_by('couple__leader'):
+            if email:
+                writer.writerow([str(distr.couple.leader), str(distr.couple.leader.email)])
+                if course.coupledance:
+                    writer.writerow([str(distr.couple.follower), str(distr.couple.follower.email)])
+            else:
+                if course.coupledance:
+                    writer.writerow([str(distr.couple.leader), str(distr.couple.follower)])
+                else:
+                    writer.writerow([str(distr.couple.leader), ' '])
         writer.writerow([' ',' '])
 
     return response

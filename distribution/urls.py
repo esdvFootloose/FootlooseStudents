@@ -15,5 +15,6 @@ urlpatterns = [
     path('distribute/manual/step/2/', views.automatic_distribute_step2, name='automaticdistribute_step2'),
     path('list/couples/', views.list_all_distributions, name='listdistributions'),
     path('csv/couples/', views.distributions_csv_per_couple, name='listdistributions_couples_csv'),
-    path('csv/courses/', views.distributions_csv_per_course, name='listdistributions_courses_csv'),
+    path('csv/courses/<int:email>/', views.distributions_csv_per_course, name='listdistributions_courses_csv'),
+    path('csv/courses/<int:email>/', views.distributions_csv_per_course, name='listdistributions_courses_csv'),
 ]
