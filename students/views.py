@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from .util import VerifyTokenGenerator, send_student_verification_mail
 from django.contrib.auth.decorators import login_required
 from datetime import date
@@ -39,20 +39,6 @@ def list_all_submissions_csv(request):
     writer.writerows(data)
 
     return response
-
-# @staff_member_required
-# def list_all_submissions_unmerged_csv(request):
-#     props, submissions = WordPress.get_subscriptions(3)
-#
-#     response = HttpResponse(content_type='text/csv')
-#     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
-#
-#     writer = csv.writer(response)
-#     writer.writerow(props)
-#     for submission in submissions:
-#         writer.writerow(submission)
-#
-#     return response
 
 @staff_member_required
 def list_submissions(request):
@@ -139,9 +125,8 @@ def list_all_students(request, type, onlynonverified=0):
                           ' onchange="toggle_activemember({})" {}/>'.format(usr.studentmeta.userid,
                                                               "checked" if usr.studentmeta.is_activemember else ""))
             ])
-    # else:
-    #     props = []
-    #     data = []
+    else:
+        return HttpResponseBadRequest()
 
     return render(request, 'list_all_students.html', {
         'props' : props,
