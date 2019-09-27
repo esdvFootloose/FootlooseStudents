@@ -66,7 +66,7 @@
             <td>
                 <select data-role="select" id="couplecreator_leader">
                 {% for user in users %}
-                    <option value="{{ user.pk }}">{{ user }}</option>
+                    <option value="{{ user.pk }}">{{ user.get_full_name }}</option>
                 {% endfor %}
                 </select>
             </td>
