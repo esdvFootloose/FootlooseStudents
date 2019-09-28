@@ -206,7 +206,14 @@ def create_couples_from_submissions(objects, matched_persons={}):
             if course not in subscriptions_per_course_couples:
                 subscriptions_per_course_couples[course] = []
             if couple_obj not in subscriptions_per_course_couples[course]:
-                subscriptions_per_course_couples[course].append(couple_obj)
+                # check if couple is already added in reverse leader/follower
+                found = False
+                for c_o in subscriptions_per_course_couples[course]:
+                    if c_o.leader == follower and c_o.follower == leader or \
+                        c_o.leader == leader and c_o.follower == follower:
+                        found = True
+                if not found:
+                    subscriptions_per_course_couples[course].append(couple_obj)
 
     return subscriptions_per_course_couples, nonmatchable_persons
 
