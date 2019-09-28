@@ -41,7 +41,7 @@
 <thead>
 <tr>
 {% for course in courses %}
-    <th>{{ course.0 }} Couple limit: {{ course.0.limit }}
+    <th>{{ course.0 }} Couple limit: {{ course.0.limit }}<br/>current: {{ course.1|length }}
         <button onclick="clear_course('{{ course.0.get_machine_name }}');" class="button alert">Clear</button>
     </th>
 {% endfor %}
