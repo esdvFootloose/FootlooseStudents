@@ -344,10 +344,10 @@ def distributions_csv_per_course(request, email=0):
         for distr in course.distributions.filter(admitted=True).order_by('couple__leader'):
             if email:
                 writer.writerow([str(distr.couple.leader.get_full_name()), str(distr.couple.leader.email)])
-                if course.coupledance:
+                if distr.couple.follower is not None:
                     writer.writerow([str(distr.couple.follower.get_full_name()), str(distr.couple.follower.email)])
             else:
-                if course.coupledance:
+                if distr.couple.follower is not None:
                     writer.writerow([str(distr.couple.leader.get_full_name()), str(distr.couple.follower.get_full_name())])
                 else:
                     writer.writerow([str(distr.couple.leader.get_full_name()), ' '])
