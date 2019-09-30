@@ -109,9 +109,9 @@ def list_all_students(request, type, onlynonverified=0):
         props = ['Username', 'Email', 'Student', 'Verified', 'Verification Email', 'Active Member']
         data = []
         if onlynonverified:
-            QS = User.objects.filter(studentmeta__isnull=False).filter(is_staff=False, verification__isnull=True, studentmeta__is_student=True)
+            QS = User.objects.filter(studentmeta__isnull=False).filter(verification__isnull=True, studentmeta__is_student=True)
         else:
-            QS = User.objects.filter(is_staff=False, studentmeta__isnull=False)
+            QS = User.objects.filter(studentmeta__isnull=False)
         for usr in QS:
             data.append([
                 usr.username,
