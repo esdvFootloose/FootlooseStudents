@@ -34,6 +34,8 @@ class WordPress:
 
         students = []
         for student in students_raw:
+            if student['nickname'] == False:
+                continue
             if not board:
                 roles = set(student['roles'])
                 if len(roles & {'um_betaald-lid-{}-{}'.format(begin.year, end.year),
