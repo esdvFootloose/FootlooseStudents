@@ -8,18 +8,12 @@ from general_vps import VPS
 logger = logging.getLogger('django')
 
 class WordpressAuthBackend:
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request, username=None, password=None, otp=None):
         if username is None or password is None:
             return None
-        if settings.DEBUG:
-            cmd = [username, password.replace('&', '\&').replace('$', '\$')]
-        else:
-            cmd = [username, password]
 
-        wp_user = VPS.executeCommand('auth', cmd)
-        try:
-            wp_user = json.loads(wp_user)
-        except:
+        wp_user = VPS.executeCommand('auth', username=username, password=password, otp=otp)
+        if wp_user is None:
             return None
 
         if STUDENT_LOGIN_DISABLED:

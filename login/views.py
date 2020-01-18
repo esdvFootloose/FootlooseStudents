@@ -13,7 +13,7 @@ def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'], otp=form.cleaned_data['otp'])
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)

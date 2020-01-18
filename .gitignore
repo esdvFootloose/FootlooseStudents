@@ -11,3 +11,4 @@ templates/static/channels/
 *.xlsx
 *.yaml
 TODO
+venv

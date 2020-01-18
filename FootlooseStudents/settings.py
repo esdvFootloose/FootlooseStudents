@@ -101,9 +101,9 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME' : 'footloosestudents',
-        'USER' : 'footloosestudents',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME' : 'django',
+        'USER' : 'django',
         'PASSWORD' : DATABASE_PASSWORD_IMPORT,
         'HOST' : 'localhost',
         'POST' : ''
