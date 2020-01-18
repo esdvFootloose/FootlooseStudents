@@ -1,5 +1,6 @@
 from django.conf import settings
 from subprocess import check_output
+import requests
 
 class VPS:
     scripts = {
@@ -8,13 +9,21 @@ class VPS:
         'auth' : '/usr/share/nginx/html/api-ext-auth.php',
     }
     @staticmethod
-    def executeCommand(command, args):
-        if command not in VPS.scripts or type(args) != list:
+    def executeCommand(command, **kwargs):
+        if command not in ['getuser', 'formsubmission', 'auth']:
             return None
 
         if settings.DEBUG:
-            cmd = ['ssh', 'footloosedirect', 'php', VPS.scripts[command]] + args
+            url = "127.0.0.1:5000"
         else:
-            cmd = ['php', VPS.scripts[command]] + args
+            url = "10.3.3.11:5000"
 
-        return check_output(cmd).decode()
+        kwargs['key'] = settings.API_KEY
+        if kwargs['otp'] is None:
+            del kwargs['otp']
+
+        if command == 'auth':
+            r = requests.post(url + "/login", json=kwargs)
+            if r.status_code == 200:
+                return r.json()
+            return None
