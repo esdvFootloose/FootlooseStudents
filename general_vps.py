@@ -10,7 +10,7 @@ class VPS:
     }
     @staticmethod
     def executeCommand(command, **kwargs):
-        if command not in ['getuser', 'formsubmission', 'auth']:
+        if command not in ['getuser', 'formsubmissions', 'auth']:
             return None
 
         if settings.DEBUG:
@@ -19,11 +19,24 @@ class VPS:
             url = "http://10.3.3.11:5000"
 
         kwargs['key'] = settings.API_KEY
-        if kwargs['otp'] is None:
-            del kwargs['otp']
 
         if command == 'auth':
+            if 'otp' in kwargs and kwargs.get('otp', None) == None:
+                del kwargs['otp']
+
             r = requests.post(url + "/login", json=kwargs)
             if r.status_code == 200:
                 return r.json()
             return None
+        elif command == 'formsubmissions':
+            kwargs['id'] = str(kwargs['id'])
+            r = requests.get(url + "/form", params=kwargs)
+            if r.status_code == 200:
+                return r.json()
+            return None
+        elif command == 'getuser':
+            r = requests.get(url + "/user/info", params=kwargs)
+            if r.status_code == 200:
+                return r.json()
+            return None
+        return None
