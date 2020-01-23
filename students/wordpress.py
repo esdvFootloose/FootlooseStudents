@@ -1,4 +1,3 @@
-import json
 from general_vps import VPS
 from django.core.cache import cache
 import re
@@ -20,17 +19,19 @@ class WordPress:
 
 
 
-        props = json.loads(VPS.executeCommand('getuser', ['props']))
+        props = VPS.executeCommand('getuser', username='props')
         #remove/move the list a bit
         props.remove('roles')
         if year is None:
             begin, end = get_academic_year()
         else:
             begin, end = year
-        cmd = []
+
         if username is not None:
-            cmd += [username]
-        students_raw = json.loads(VPS.executeCommand('getuser', cmd))
+            students_raw = VPS.executeCommand('getuser', username=username)
+        else:
+            students_raw = VPS.executeCommand('getuser')
+
 
         students = []
         for student in students_raw:
@@ -66,7 +67,7 @@ class WordPress:
 
     @staticmethod
     def get_subscriptions(formid, as_dict=False):
-        submissions = json.loads(VPS.executeCommand('formsubmissions', [str(formid)]))
+        submissions = VPS.executeCommand('formsubmissions', id=formid)
 
         props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
         for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
@@ -136,7 +137,7 @@ class WordPress:
         if cdata is not None:
             return cdata
 
-        submissions = json.loads(VPS.executeCommand('formsubmissions', [str(formid)]))
+        submissions = VPS.executeCommand('formsubmissions', id=formid)
 
         committees = {}
         for sub in submissions:
