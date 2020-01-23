@@ -14,9 +14,9 @@ class VPS:
             return None
 
         if settings.DEBUG:
-            url = "127.0.0.1:5000"
+            url = "http://127.0.0.1:5000"
         else:
-            url = "10.3.3.11:5000"
+            url = "http://10.3.3.11:5000"
 
         kwargs['key'] = settings.API_KEY
         if kwargs['otp'] is None:
