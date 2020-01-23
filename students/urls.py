@@ -3,6 +3,7 @@ from . import views
 
 app_name = 'students'
 urlpatterns = [
+    path('stats/', views.stats, name='stats'),
     path('list/submissions/', views.list_submissions, name='listsubmissions'),
     path('list/submissions/csv/', views.list_all_submissions_csv, name='listallsubmissionscsv'),
     # path('list/submissions/csv/unmerged/', views.list_all_submissions_unmerged_csv, name='listallsubmissionsunmergedcsv'),

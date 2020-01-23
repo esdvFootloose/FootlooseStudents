@@ -10,6 +10,7 @@ from .wordpress import WordPress
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from ipware import get_client_ip
+from distribution.models import Distribution
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -133,6 +134,67 @@ def list_all_students(request, type, onlynonverified=0):
         'students' : data,
         'type': type
     })
+
+def calculate_age(born):
+    today = date.today()
+    if today.replace(year=born.year) < today:
+        # birthday already passed
+        return today.year - born. year
+    else:
+        return today.year - born.year - 1
+
+
+@staff_member_required
+def stats(request):
+    data_studies = {}
+    data_gender = {'male': 0, 'female': 0, 'other': 0}
+    data_institute = {'tue': 0, 'fontys': 0, 'other': 0}
+    data_student = {'yes': 0, 'no': 0}
+
+    users_counted = []
+    
+    # warm up cache
+    WordPress.get_students_data(as_dict=True)
+
+    dists = Distribution.objects.filter(admitted=True)
+    for distr in dists:
+        usrs = [distr.couple.leader]
+        if distr.couple.follower is not None:
+            usrs.append(distr.couple.follower)
+        for usr in usrs:
+            if usr.pk not in users_counted:
+                try:
+                    d = WordPress.get_students_data(username=usr.username, as_dict=True)[1][0]
+                except IndexError:
+                    continue
+                
+                if d['gender'][0].lower() == 'm':
+                    data_gender['male'] += 1
+                elif d['gender'][0].lower() == 'f':
+                    data_gender['female'] += 1
+                else:
+                    data_gender['other'] += 1
+
+                if d['footloose_student'] == 'Yes':
+                    data_student['yes'] += 1
+                    if d['footloose_institution'] == 'Eindhoven University of Technology':
+                        data_institute ['tue'] += 1
+
+                        if d['footloose_faculty'] not in data_studies:
+                            data_studies[d['footloose_faculty']] = 1
+                        else:
+                            data_studies[d['footloose_faculty']] += 1
+
+                    elif d['footloose_institution'] =='Fontys':
+                        data_institute['fontys'] += 1
+                    else:
+                        data_institute['other'] += 1
+
+                    
+                else:
+                    data_student['no'] += 1
+
+    return render(request, 'stats.html', {'studies':data_studies, 'gender': data_gender, 'institute': data_institute, 'student': data_student})
 
 
 @staff_member_required
