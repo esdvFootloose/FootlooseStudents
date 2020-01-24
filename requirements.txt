@@ -8,3 +8,4 @@ openpyxl
 django-recaptcha2
 django-ipware
 requests
+matplotlib
