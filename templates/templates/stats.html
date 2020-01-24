@@ -17,12 +17,16 @@
     {% endfor %}
 </table>
 
+{{ gender_chart }}
+
 <h4>Student Count</h4>
 <table class="table">
     {% for k,v in student.items %}
         <tr><td class="small">{{ k }}</td><td>{{ v }}</td></tr>
     {% endfor %}
 </table>
+
+{{ student_chart }}
 
 <h4>Institute Count</h4>
 <table class="table">
@@ -31,12 +35,16 @@
     {% endfor %}
 </table>
 
+{{ institute_chart }}
+
 <h4>Faculty Count</h4>
 <table class="table">
     {% for k,v in studies.items %}
         <tr><td class="small">{{ k }}</td><td>{{ v }}</td></tr>
     {% endfor %}
 </table>
+
+{{ studies_chart }}
 
 
 {% endblock %}

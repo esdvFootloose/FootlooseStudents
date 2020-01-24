@@ -11,6 +11,9 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from ipware import get_client_ip
 from distribution.models import Distribution
+import io
+import matplotlib.pyplot as plt
+from django.utils.safestring import mark_safe
 
 @staff_member_required
 def list_all_submissions_csv(request):
@@ -143,6 +146,16 @@ def calculate_age(born):
     else:
         return today.year - born.year - 1
 
+def createpie(data):
+    fig = plt.figure()
+
+    plt.pie([float(v) for v in data.values()], labels=list(data.keys()), autopct='%1.0f%%')
+
+    buf = io.StringIO()
+    fig.savefig(buf, format='svg')
+    buf.seek(0)
+
+    return buf.read()
 
 @staff_member_required
 def stats(request):
@@ -194,7 +207,9 @@ def stats(request):
                 else:
                     data_student['no'] += 1
 
-    return render(request, 'stats.html', {'studies':data_studies, 'gender': data_gender, 'institute': data_institute, 'student': data_student})
+
+
+    return render(request, 'stats.html', {'studies':data_studies, 'gender': data_gender, 'institute': data_institute, 'student': data_student, 'studies_chart': mark_safe(createpie(data_studies)), 'institute_chart': mark_safe(createpie(data_institute)), 'student_chart': mark_safe(createpie(data_student)), 'gender_chart': mark_safe(createpie(data_gender)) })
 
 
 @staff_member_required
