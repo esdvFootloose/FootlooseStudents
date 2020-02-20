@@ -3,6 +3,8 @@ from django.core.cache import cache
 import re
 from itertools import groupby
 from general_util import get_academic_year
+# import pytz
+# from datetime import datetime
 
 class WordPress:
     @staticmethod
@@ -66,35 +68,98 @@ class WordPress:
         return props, data
 
     @staticmethod
-    def get_subscriptions(formid, as_dict=False):
-        submissions = VPS.executeCommand('formsubmissions', id=formid)
+    def get_subscriptions(formid):
+        submissions_raw = VPS.executeCommand('formsubmissions', id=formid)
 
-        props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
-        for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
-            if p == 'policy':
-                continue
-            props.append(p)
-        if as_dict:
-            return props, submissions
+        to_bool = lambda x: True if x == '1' else False
 
-        props.remove('')
-        if '_edit' not in props:
-            props.append('_edit')
-        data = []
-        for sub in submissions:
-            sub_data = []
-            for prop in props:
-                try:
-                    sub_data.append(sub[prop])
-                except KeyError:
-                    sub_data.append('')
-            try:
-                sub_data[props.index('_edit')] = int(sub_data[props.index('_edit')].split(':')[0])
-            except ValueError:
-                sub_data[props.index('_edit')] = -1
-            data.append(sub_data)
+        # props = ['user_id', 'first_name', 'last_name', 'emailadres','student']
+        # for p in  sorted([x for x in list(submissions[0].keys()) if x not in props]):
+        #     if p != '' and p[0] != '_' and len(p.split('_')) < 4:
+        #         props.append(p)
+        submissions_all = []
+        props = [
+        'user_id',
+        'seqid',
+        'first_name',
+        'last_name',
+        'student',
+        # 'time',
+        'emailadres',
+        'modern_1',
+        'modern_2',
+        'modern_3',
+        'ballet_1',
+        'ballet_2',
+        'ballet_3',
+        'hiphop_1',
+        'hiphop_2',
+        'hiphop_3',
+        'zouk_1',
+        'zouk_2',
+        'zouk_3',
+        'hiphop_demoteam',
+        'project_sputnik',
+        'salsa_1',
+        'salsa_2',
+        'salsa_3',
+        'salsa_4',
+        'ballroom_bronze',
+        'ballroom_silver',
+        'ballroom_silverstar',
+        'ballroom_gold',
+        'ballroom_topclass',
+        'ballroom_alumni',
+        'partners',
+        ]
+        for sub in submissions_raw:
+            # because of subtle differences in the wordpress setup do hardcoded conversion here
+            submissions_all.append({
+                'user_id': int(sub['user_id']),
+                'seqid': int(sub['_seq']),
+                'first_name': sub['first_name'],
+                'last_name': sub['last_name'],
+                'student': sub['student'],
+                # 'time': pytz.timezone("UTC").localize(datetime.fromtimestamp(int(sub['_edit'].split(':')[0])))
+                #     .astimezone(pytz.timezone("Europe/Amsterdam")),
+                'emailadres': sub['emailadres'],
+                'modern_1': to_bool(sub['modern_jazz_1']),
+                'modern_2': to_bool(sub['modern_jazz_2']),
+                'modern_3': to_bool(sub['modern_3']),
+                'ballet_1': to_bool(sub['ballet_1']),
+                'ballet_2': to_bool(sub['ballet_2']),
+                'ballet_3': to_bool(sub['ballet_3']),
+                'hiphop_1': to_bool(sub['hiphop_1']),
+                'hiphop_2': to_bool(sub['hiphop_2']),
+                'hiphop_3': to_bool(sub['hiphop_3']),
+                'zouk_1': to_bool(sub['zouk_1']),
+                'zouk_2': to_bool(sub['zouk_2']),
+                'zouk_3': to_bool(sub['zouk_3']),
+                'hiphop_demoteam': to_bool(sub['hiphop_demo_team']),
+                'project_sputnik': to_bool(sub['project_sputnik']),
+                'salsa_1': to_bool(sub['salsa_1']),
+                'salsa_2': to_bool(sub['salsa_2']),
+                'salsa_3': to_bool(sub['salsa_3']),
+                'salsa_4': to_bool(sub['salsa_3']),
+                'ballroom_bronze': to_bool(sub['ballroom_bronze']),
+                'ballroom_silver': to_bool(sub['ballroom_silver']),
+                'ballroom_silverstar': to_bool(sub['ballroom_silverstar']),
+                'ballroom_gold': to_bool(sub['ballroom_gold']),
+                'ballroom_topclass': to_bool(sub['ballroom_topclass']),
+                'ballroom_alumni': to_bool(sub['ballroom_alumni_reuenisten']),
+                'partners': sub['please_indicate_per_dance_course_who_your_dance_partner_is_going_to_be_leave_blank_if_you_haven_t_found_a_dance_partner_yet_or_if_a_dance_partner_is_not_applicable_for_your_course']
+            })
 
-        return props, data
+        # filter out all double submissions, simply ignore everything before last one
+        #  sort first by user_id then by sequence id
+        submissions_all = sorted(submissions_all, key=lambda x: (x['user_id'], x['seqid']), reverse=True)
+        #  groupby and select only the first (because sorted so highest sequence id)
+        submission_filter = [list(group)[0] for key, group in groupby(submissions_all, lambda x: x['user_id'])]
+        #  sort by user_id again
+        submission_filter = sorted(submission_filter, key=lambda x: x['user_id'])
+
+
+        return props, submission_filter
 
     @staticmethod
     def get_subscriptions_objects(props, subscriptions=None):
