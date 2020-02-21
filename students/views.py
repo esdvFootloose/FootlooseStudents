@@ -183,6 +183,7 @@ def stats(request):
                     
                 else:
                     data_student['no'] += 1
+                users_counted.append(usr.pk)
 
 
 
