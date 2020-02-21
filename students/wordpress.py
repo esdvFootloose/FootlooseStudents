@@ -68,7 +68,7 @@ class WordPress:
         return props, data
 
     @staticmethod
-    def get_subscriptions(formid):
+    def get_subscriptions(formid, aslist=False):
         submissions_raw = VPS.executeCommand('formsubmissions', id=formid)
 
         to_bool = lambda x: True if x == '1' else False
@@ -158,8 +158,10 @@ class WordPress:
         #  sort by user_id again
         submission_filter = sorted(submission_filter, key=lambda x: x['user_id'])
 
-
-        return props, submission_filter
+        if not aslist:
+            return props, submission_filter
+        else:
+            return props, [[sub[p] for p in props] for sub in submission_filter]
 
     @staticmethod
     def get_subscriptions_objects(props, subscriptions=None):

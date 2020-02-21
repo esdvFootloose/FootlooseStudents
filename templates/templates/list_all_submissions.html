@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {%  load static %}
+{% load custom_filters %}
 
 {% block body %}
 <h3>All Submissions</h3>
@@ -18,7 +19,17 @@
 {% for submission in submissions %}
 <tr>
     {% for data in submission %}
-        <td>{{ data }}</td>
+        <td>
+        {%  if data|istype == 'bool' %}
+            {% if data %}
+            <span class="mif-done fg-green mif-3x"></span>
+            {% else %}
+            <span class="mif-not fg-red"></span>
+            {% endif %}
+        {% else %}
+            {{ data }}
+        {% endif %}
+        </td>
     {% endfor %}
 </tr>
 {% endfor %}
