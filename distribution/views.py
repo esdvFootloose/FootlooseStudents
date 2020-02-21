@@ -137,149 +137,179 @@ def manual_distribute(request, pk):
         'users': User.objects.all()
     })
 
-def create_couples_from_submissions(objects, matched_persons={}):
-    subscriptions_per_course = {}
-
-    # convert data to per course basis
-    for object in objects:
-        for course in object['courses']:
-            if course[0] == 'none':
-                continue
-            if course[0] not in subscriptions_per_course:
-                subscriptions_per_course[course[0]] = []
-            subscriptions_per_course[course[0]].append([object['user_id'], course[1]])
-
-    nonmatchable_persons = []
-    subscriptions_per_course_couples = {}
-
-    # match and create all couples if applicable
-    for course, couples in subscriptions_per_course.items():
-        for i, couple in enumerate(couples):
-            # we do not actually ask at subscription who is follower and leader, just partner
-            # so the distinction here is arbitrairy and simply for better db representation
-
-            try:
-                leader = User.objects.get(studentmeta__userid=int(couple[0]))
-            except User.DoesNotExist:
-                # this should not happend, invalid entry so skip
-                continue
-
-            if couple[1].strip() != '':
-                # (fuzzy) search the text partner
-                name = strip_accents(couple[1]).replace(' ', '').lower()
-                if matched_persons.get(name, [''])[0] != '':
-                    follower = User.objects.get(pk=int(matched_persons[name][0]))
-                else:
-                    try:
-                        follower = User.objects.get(username=name)
-                    except (User.DoesNotExist, User.MultipleObjectsReturned):
-                        try:
-                            follower = User.objects.get(username__contains=name)
-                        except (User.DoesNotExist, User.MultipleObjectsReturned):
-                            # fuzzy search needed
-                            if matched_persons == {}:
-                                nonmatchable_persons.append(couple[1])
-                                continue
-                            else:
-                                follower = None
-            else:
-                follower = None
-
-            if follower is not None:
-                # see if this couple already exists
-                try:
-                    couple_obj = Couple.objects.get(leader=leader, follower=follower)
-                except Couple.DoesNotExist:
-                    try:
-                        couple_obj = Couple.objects.get(leader=follower, follower=leader)
-                    except Couple.DoesNotExist:
-                        # does not exists so create
-                        couple_obj = Couple(leader=leader, follower=follower)
-                        couple_obj.save()
-            else:
-                try:
-                    couple_obj = Couple.objects.get(leader=leader, follower__isnull=True)
-                except Couple.DoesNotExist:
-                    couple_obj = Couple(leader=leader)
-                    couple_obj.save()
-
-            if course not in subscriptions_per_course_couples:
-                subscriptions_per_course_couples[course] = []
-            if couple_obj not in subscriptions_per_course_couples[course]:
-                # check if couple is already added in reverse leader/follower
-                found = False
-                for c_o in subscriptions_per_course_couples[course]:
-                    if c_o.leader == follower and c_o.follower == leader or \
-                        c_o.leader == leader and c_o.follower == follower:
-                        found = True
-                if not found:
-                    subscriptions_per_course_couples[course].append(couple_obj)
-
-    return subscriptions_per_course_couples, nonmatchable_persons
+# temp disabled
+# def create_couples_from_submissions(objects, matched_persons={}):
+#     subscriptions_per_course = {}
+#
+#     # convert data to per course basis
+#     for object in objects:
+#         for course in object['courses']:
+#             if course[0] == 'none':
+#                 continue
+#             if course[0] not in subscriptions_per_course:
+#                 subscriptions_per_course[course[0]] = []
+#             subscriptions_per_course[course[0]].append([object['user_id'], course[1]])
+#
+#     nonmatchable_persons = []
+#     subscriptions_per_course_couples = {}
+#
+#     # match and create all couples if applicable
+#     for course, couples in subscriptions_per_course.items():
+#         for i, couple in enumerate(couples):
+#             # we do not actually ask at subscription who is follower and leader, just partner
+#             # so the distinction here is arbitrairy and simply for better db representation
+#
+#             try:
+#                 leader = User.objects.get(studentmeta__userid=int(couple[0]))
+#             except User.DoesNotExist:
+#                 # this should not happend, invalid entry so skip
+#                 continue
+#
+#             if couple[1].strip() != '':
+#                 # (fuzzy) search the text partner
+#                 name = strip_accents(couple[1]).replace(' ', '').lower()
+#                 if matched_persons.get(name, [''])[0] != '':
+#                     follower = User.objects.get(pk=int(matched_persons[name][0]))
+#                 else:
+#                     try:
+#                         follower = User.objects.get(username=name)
+#                     except (User.DoesNotExist, User.MultipleObjectsReturned):
+#                         try:
+#                             follower = User.objects.get(username__contains=name)
+#                         except (User.DoesNotExist, User.MultipleObjectsReturned):
+#                             # fuzzy search needed
+#                             if matched_persons == {}:
+#                                 nonmatchable_persons.append(couple[1])
+#                                 continue
+#                             else:
+#                                 follower = None
+#             else:
+#                 follower = None
+#
+#             if follower is not None:
+#                 # see if this couple already exists
+#                 try:
+#                     couple_obj = Couple.objects.get(leader=leader, follower=follower)
+#                 except Couple.DoesNotExist:
+#                     try:
+#                         couple_obj = Couple.objects.get(leader=follower, follower=leader)
+#                     except Couple.DoesNotExist:
+#                         # does not exists so create
+#                         couple_obj = Couple(leader=leader, follower=follower)
+#                         couple_obj.save()
+#             else:
+#                 try:
+#                     couple_obj = Couple.objects.get(leader=leader, follower__isnull=True)
+#                 except Couple.DoesNotExist:
+#                     couple_obj = Couple(leader=leader)
+#                     couple_obj.save()
+#
+#             if course not in subscriptions_per_course_couples:
+#                 subscriptions_per_course_couples[course] = []
+#             if couple_obj not in subscriptions_per_course_couples[course]:
+#                 # check if couple is already added in reverse leader/follower
+#                 found = False
+#                 for c_o in subscriptions_per_course_couples[course]:
+#                     if c_o.leader == follower and c_o.follower == leader or \
+#                         c_o.leader == leader and c_o.follower == follower:
+#                         found = True
+#                 if not found:
+#                     subscriptions_per_course_couples[course].append(couple_obj)
+#
+#     return subscriptions_per_course_couples, nonmatchable_persons
 
 def user_label_from_instance(self):
     return self.get_full_name()
 
 
+## temp disabled
+# @staff_member_required
+# def automatic_distribute_step1(request):
+#     if request.method != "POST":
+#         return render(request, 'confirm.html', {
+#             'subject': 'This will delete all existing distributions and couples, please confirm',
+#             'form': Confirm()
+#         })
+#     form = Confirm(request.POST)
+#     if not form.is_valid():
+#         return render(request, 'confirm.html', {
+#             'subject': 'This will delete all existing distributions and couples, please confirm',
+#             'form': form
+#         })
+#     # delete all old distributions
+#     Distribution.objects.all().delete()
+#     # calculate the couples from the submissions and report back the non matchable names
+#     nonmatchable_persons = create_couples_from_submissions(
+#             WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)))[1]
+#     # setup a form with fields of non matchable names
+#     form = forms.Form()
+#     for person in nonmatchable_persons:
+#         name = strip_accents(person).replace(' ', '').lower()
+#         form.fields[name] = forms.ModelChoiceField(User.objects.all(), label=person, widget=forms.Select(attrs={'data-role': 'select'}))
+#         form.fields[name].label_from_instance = user_label_from_instance
+#         form.fields[name].required = False
+#
+#     return render(request, 'automatic_distribute_step.html', {
+#         'users': User.objects.all(),
+#         'form': form
+#     })
+
+
 @staff_member_required
-def automatic_distribute_step1(request):
+# @require_POST
+# temp changed for new form setup
+# it reuses existing defined couples
+def automatic_distribute_step2(request):
+    # # user has manually matched the non matchable names, rerun the create couples system with this input
+    # subscriptions_per_course_couples = create_couples_from_submissions(
+    #         WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)), dict(request.POST)
+    #     )[0]
+
+    # iterate all courses and couples and create distributions
+    # temp changed: use existing distribution as couples
+    # for coursename, couples in subscriptions_per_course_couples.items():
+    #     ctype = CourseType.objects.get(name=coursename.split(' ')[0].lower())
+    #     try:
+    #         course = Course.objects.get(name=ctype, level=int(coursename.split(' ')[-1]))
+    #     except:
+    #         course = Course.objects.get(name=ctype, levelname=''.join(coursename.split(' ')[1:]).lower())
+    #
+    #     # auto reject all couples with no partner for the dances that need a partner
+    #     couples_elligble = []
+    #
+    #     if course.coupledance:
+    #         for couple in couples:
+    #             if couple.follower is None:
+    #                 Distribution(couple=couple, course=course, reason=1, admitted=False).save()
+    #             else:
+    #                 couples_elligble.append(couple)
+    #     else:
+    #         couples_elligble = couples
+
     if request.method != "POST":
         return render(request, 'confirm.html', {
-            'subject': 'This will delete all existing distributions and couples, please confirm',
+            'subject': 'This will redo all existing distributions and couples, please confirm',
             'form': Confirm()
         })
     form = Confirm(request.POST)
     if not form.is_valid():
         return render(request, 'confirm.html', {
-            'subject': 'This will delete all existing distributions and couples, please confirm',
+            'subject': 'This will redo all existing distributions and couples, please confirm',
             'form': form
         })
-    # delete all old distributions
-    Distribution.objects.all().delete()
-    # calculate the couples from the submissions and report back the non matchable names
-    nonmatchable_persons = create_couples_from_submissions(
-            WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)))[1]
-    # setup a form with fields of non matchable names
-    form = forms.Form()
-    for person in nonmatchable_persons:
-        name = strip_accents(person).replace(' ', '').lower()
-        form.fields[name] = forms.ModelChoiceField(User.objects.all(), label=person, widget=forms.Select(attrs={'data-role': 'select'}))
-        form.fields[name].label_from_instance = user_label_from_instance
-        form.fields[name].required = False
 
-    return render(request, 'automatic_distribute_step.html', {
-        'users': User.objects.all(),
-        'form': form
-    })
-
-
-@staff_member_required
-@require_POST
-def automatic_distribute_step2(request):
-    # user has manually matched the non matchable names, rerun the create couples system with this input
-    subscriptions_per_course_couples = create_couples_from_submissions(
-            WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9)), dict(request.POST)
-        )[0]
-
-    # iterate all courses and couples and create distributions
-    for coursename, couples in subscriptions_per_course_couples.items():
-        ctype = CourseType.objects.get(name=coursename.split(' ')[0].lower())
-        try:
-            course = Course.objects.get(name=ctype, level=int(coursename.split(' ')[-1]))
-        except:
-            course = Course.objects.get(name=ctype, levelname=''.join(coursename.split(' ')[1:]).lower())
-
-        # auto reject all couples with no partner for the dances that need a partner
-        couples_elligble = []
-
+    for course in Course.objects.all():
         if course.coupledance:
-            for couple in couples:
-                if couple.follower is None:
-                    Distribution(couple=couple, course=course, reason=1, admitted=False).save()
-                else:
-                    couples_elligble.append(couple)
+            couples_elligble = [d.couple for d in Distribution.objects.filter(course=course, couple__follower__isnull=False)]
+            couples_non_elligble = [d.couple for d in Distribution.objects.filter(course=course, couple__follower__isnull=True)]
         else:
-            couples_elligble = couples
+            couples_elligble = [d.couple for d in Distribution.objects.filter(course=course)]
+            couples_non_elligble = []
+
+        Distribution.objects.filter(course=course).delete()
+
+        for couple in couples_non_elligble:
+            Distribution(couple=couple, course=course, reason=1, admitted=False).save()
 
         r = random.SystemRandom()
         # select according to policy the different types of students and shuffle them randomly within the catogory

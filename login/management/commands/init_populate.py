@@ -20,6 +20,7 @@ class Command(BaseCommand):
             ("zouk", 3, True),
             ("salsa", 4, True),
             ("ballroom", 5, True),
+            ('projectsputnik', 1, False)
         ]
 
         names = {
@@ -28,7 +29,8 @@ class Command(BaseCommand):
                 "silver",
                 "silverstar",
                 "gold",
-                "topclass"
+                "topclass",
+                "alumni"
             ]
         }
 

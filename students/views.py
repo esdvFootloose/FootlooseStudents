@@ -17,23 +17,17 @@ from django.utils.safestring import mark_safe
 
 @staff_member_required
 def list_all_submissions_csv(request):
-    objects = WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9))
+    props, data_raw = WordPress.get_subscriptions(3, aslist=True)
 
-    props = [
-        'user_id',
-        'name',
-        'email',
-        'student',
-    ] + ['course choice {}'.format(i+1) for i in range(len(objects[0]['courses']))]
     data = []
-
-    for obj in objects:
-        data.append([
-            obj['user_id'],
-            obj['first_name'] + " " + obj['last_name'],
-            obj['emailadres'],
-            obj['student'],
-        ] + ["{} - {}".format(x[0], x[1]) for x in obj['courses']])
+    for sub in data_raw:
+        row = []
+        for v in sub:
+            if type(v) == bool:
+                row.append(1 if v else 0)
+            else:
+                row.append(v)
+        data.append(row)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="submissions.csv"'
@@ -46,24 +40,7 @@ def list_all_submissions_csv(request):
 
 @staff_member_required
 def list_submissions(request):
-    objects = WordPress.get_subscriptions_objects(WordPress.get_subscriptions(9))
-
-    props = [
-        'user_id',
-        'name',
-        'email',
-        'student',
-    ] + ['course choice {}'.format(i+1) for i in range(len(objects[0]['courses']))]
-    data = []
-
-    for obj in objects:
-        data.append([
-            obj['user_id'],
-            obj['first_name'] + " " + obj['last_name'],
-            obj['emailadres'],
-            obj['student'],
-        ] + ["{} - {}".format(x[0], x[1]) for x in obj['courses']])
-
+    props, data = WordPress.get_subscriptions(3, aslist=True)
 
     return render(request, 'list_all_submissions.html', {
         'props' : props,
