@@ -140,7 +140,7 @@ class WordPress:
                 'salsa_1': to_bool(sub['salsa_1']),
                 'salsa_2': to_bool(sub['salsa_2']),
                 'salsa_3': to_bool(sub['salsa_3']),
-                'salsa_4': to_bool(sub['salsa_3']),
+                'salsa_4': to_bool(sub['salsa_4']),
                 'ballroom_bronze': to_bool(sub['ballroom_bronze']),
                 'ballroom_silver': to_bool(sub['ballroom_silver']),
                 'ballroom_silverstar': to_bool(sub['ballroom_silverstar']),
