@@ -41,8 +41,8 @@ class WordPress:
                 continue
             if not board:
                 roles = set(student['roles'])
-                if len(roles & {'um_betaald-lid-{}-{}'.format(begin.year, end.year),
-                                'um_onbetaald-lid-{}-{}'.format(begin.year, end.year), 'um_bestuur', 'administrator', 'um_te-laat' }) == 0:
+                if len(roles & {'um_paid-member-{}-{}'.format(begin.year, end.year),
+                                'um_unpaid-member-{}-{}'.format(begin.year, end.year), 'um_bestuur', 'administrator', 'um_too-late' }) == 0:
                     continue
             else:
                 if 'commissie' in student['nickname'] or 'bestuur' in student['nickname'].lower():
@@ -99,7 +99,7 @@ class WordPress:
         'zouk_2',
         'zouk_3',
         'hiphop_demoteam',
-        'project_sputnik',
+        'improvisation',
         'salsa_1',
         'salsa_2',
         'salsa_3',
@@ -123,8 +123,8 @@ class WordPress:
                 # 'time': pytz.timezone("UTC").localize(datetime.fromtimestamp(int(sub['_edit'].split(':')[0])))
                 #     .astimezone(pytz.timezone("Europe/Amsterdam")),
                 'emailadres': sub['emailadres'],
-                'modern_1': to_bool(sub['modern_jazz_1']),
-                'modern_2': to_bool(sub['modern_jazz_2']),
+                'modern_1': to_bool(sub['modern_1']),
+                'modern_2': to_bool(sub['modern_2']),
                 'modern_3': to_bool(sub['modern_3']),
                 'ballet_1': to_bool(sub['ballet_1']),
                 'ballet_2': to_bool(sub['ballet_2']),
@@ -136,7 +136,7 @@ class WordPress:
                 'zouk_2': to_bool(sub['zouk_2']),
                 'zouk_3': to_bool(sub['zouk_3']),
                 'hiphop_demoteam': to_bool(sub['hiphop_demo_team']),
-                'project_sputnik': to_bool(sub['project_sputnik']),
+                'improvisation': to_bool(sub['improvisation']),
                 'salsa_1': to_bool(sub['salsa_1']),
                 'salsa_2': to_bool(sub['salsa_2']),
                 'salsa_3': to_bool(sub['salsa_3']),
@@ -146,7 +146,7 @@ class WordPress:
                 'ballroom_silverstar': to_bool(sub['ballroom_silverstar']),
                 'ballroom_gold': to_bool(sub['ballroom_gold']),
                 'ballroom_topclass': to_bool(sub['ballroom_topclass']),
-                'ballroom_alumni': to_bool(sub['ballroom_alumni_reuenisten']),
+                'ballroom_alumni': to_bool(sub['ballroom_alumni']),
                 'partners': sub['please_indicate_per_dance_course_who_your_dance_partner_is_going_to_be_leave_blank_if_you_haven_t_found_a_dance_partner_yet_or_if_a_dance_partner_is_not_applicable_for_your_course']
             })
 

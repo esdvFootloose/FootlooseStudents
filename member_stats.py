@@ -47,9 +47,9 @@ for distr in distrs:
 
 
 membership_cost = 40
-first_course_cost_student = 30
-first_course_cost_nonstudent = 40
-other_course_cost_student = 20
-other_course_cost_nonstudent = 30
+first_course_cost_student = 35
+first_course_cost_nonstudent = 55
+other_course_cost_student = 25
+other_course_cost_nonstudent = 45
 
 print(json.dumps(admitted_users))
