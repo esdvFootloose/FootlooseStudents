@@ -6,6 +6,8 @@ from .forms import *
 from django.utils.http import is_safe_url
 from django.conf import settings
 from FootlooseStudents.secret import STUDENT_LOGIN_DISABLED
+import logging
+logger = logging.getLogger(__name__)
 
 def login(request):
     if request.user.is_authenticated:
